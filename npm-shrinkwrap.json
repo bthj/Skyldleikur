@@ -1,0 +1,25 @@
+{
+  "name": "skyldleikur",
+  "version": "0.1.0",
+  "dependencies": {
+    "node-static": {
+      "version": "0.6.7",
+      "dependencies": {
+        "optimist": {
+          "version": "0.3.5",
+          "dependencies": {
+            "wordwrap": {
+              "version": "0.0.2"
+            }
+          }
+        },
+        "colors": {
+          "version": "0.6.0-1"
+        }
+      }
+    },
+    "restler": {
+      "version": "2.0.1"
+    }
+  }
+}

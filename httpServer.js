@@ -43,7 +43,8 @@ var static = require('node-static'),
     http = require('http'),
     url = require("url"),
     path = require("path"),
-    restler = require("restler");
+//    restler = require("restler");
+    request = require('request');
 
 var file = new(static.Server)();
 
@@ -79,10 +80,18 @@ http.createServer(function (req, res) {
             });
 */       
             console.log('performing get to: http://www.islendingabok.is/ib_app/' + req.url.substring(4));
+/*
             restler.get('http://www.islendingabok.is/ib_app/' + req.url.substring(4), {
             }).on('complete', function (data) {
                 console.log(data);
                 res.end(data);
+            });
+*/
+            request('http://www.islendingabok.is/ib_app/' + req.url.substring(4), function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    console.log(body);
+                    res.end(body);
+                }
             });
         }
         
