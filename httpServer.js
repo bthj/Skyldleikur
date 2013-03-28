@@ -49,6 +49,8 @@ var static = require('node-static'),
 var file = new(static.Server)();
 
 http.createServer(function (req, res) {
+    //res.setHeader('Content-Encoding','UTF-8');
+    //res.writeHead(200, {'Content-Type': 'text/plain; charset=utf8'});
     var my_path = url.parse(req.url).pathname;  
     var full_path = path.join(process.cwd(),my_path);  
     path.exists(full_path,function(exists){
@@ -90,7 +92,7 @@ http.createServer(function (req, res) {
             request('http://www.islendingabok.is/ib_app/' + req.url.substring(4), function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     console.log(body);
-                    res.end(body);
+                    res.end(body, 'utf-8');
                 }
             });
         }

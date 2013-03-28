@@ -3,6 +3,7 @@
   "version" : "0.1.0",
   "dependencies" : {
     "node-static" : "0.6.7",
-    "restler" : "2.0.1"
+    "restler" : "2.0.1",
+    "request" : "2.16.6"
   }
 }
