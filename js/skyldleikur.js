@@ -2,6 +2,7 @@
 /*global $, jQuery, alert, console */
 /*jshint loopfunc: true */
 
+//var einnSkyldleikur;
 
 $(function () {
 //(function() {
@@ -19,39 +20,152 @@ $(function () {
     var Skyldleikurinn = function( initialAncestry ) {
         this.ancestry = initialAncestry;
         /**
-         * levels er fylki af fylkjum fyrir hvert borð, þar sem hvert þeirra inniheldur:
-         * [0] startIndex fyrir þetta level í forfeðrafylki
-         * [1] endIndex fyrir þetta level í forfeðrafylki
-         * [2] unlocked:  true / false
-         * [3] stars:  með hve góðum árangri var þetta borð klárað (fjöldi stjarna 1-3) ?
+         * levels er fylki af hlutum fyrir hvert borð, þar sem hvert þeirra inniheldur:
+         * startIndex fyrir þetta level í forfeðrafylki
+         * endIndex fyrir þetta level í forfeðrafylki
+         * unlocked:  true / false
+         * stars:  með hve góðum árangri var þetta borð klárað (fjöldi stjarna 1-3) ?
+         * progress:  fyrir hve marga hefur verið svarað rétt
+         * completedIndexes:  hlutur með vísum >= startIndex og <= endIndex sem lyklum og 
+         *  gildum sem segja til um hvort vísir (einstaklingur) sé afgreiddur
+         *      {2:false, 3:true, osfrv...}
         */
         this.levels = [];
+        
+        this.questionTypes = {
+            0 : 'askPlaceAndYearOfBirth'
+        };
+        this.getQuestionType = function( levelIndex ) {
+            // TODO:  ólíkar tegundir spurninga eftir vægi
+            return 0;
+        };
+        this.getQuestion = function( questionType, personIndex, gender ) {
+            if( questionType === 0 ) {
+               return this.askPlaceAndYearOfBirth( personIndex, gender );
+            } else {
+                return this.askPlaceAndYearOfBirth( personIndex, gender );
+            }
+        };
+        
+        this.askPlaceAndYearOfBirth = function( personIndex, gender ) {
+            var person = this.getPerson( personIndex );
+            var question = '';
+            if( gender === 1 ) {
+                question = 'Fæddur ';
+            } else {
+                question = 'Fædd ';
+            }
+            question += person.pob + ' ' + person.dob.substring(0,4);
+            return question;
+        };
+        
+        this.presentQuestion = function( levelIndex ) {
+            var oneLevel = this.levels[levelIndex];
+            var indexForPersonToPresent;
+            var countCompletedPersons = oneLevel.endIndex - (oneLevel.startIndex-1);
+            if( countCompletedPersons != oneLevel.progress ) {
+                do {
+                    indexForPersonToPresent = randomFromInterval( oneLevel.startIndex, oneLevel.endIndex );
+                } while( oneLevel.completedIndexes[indexForPersonToPresent] );  // ef höfum afgreitt einstakling, tökum næsta
+            }
+            if( indexForPersonToPresent ) {
+                // sækjum ranga möguleika
+                var ancestryStartIndex;
+                if( levelIndex == 1 ) { // við erum að skoða foreldrana, tökum þig með líka
+                    ancestryStartIndex = 1;
+                } else {
+                    ancestryStartIndex = oneLevel.startIndex;
+                }
+                var wrongAncestryIndexes = [];
+                for( var i=0; i < 2; i++ ) {
+                    var oneWrongAncestryIndex = randomFromInterval(ancestryStartIndex, oneLevel.endIndex);
+                    if( oneWrongAncestryIndex == indexForPersonToPresent 
+                            || $.inArray(oneWrongAncestryIndex, wrongAncestryIndexes) > -1 ) {
+                        i--;
+                    } else {
+                        wrongAncestryIndexes[i] = oneWrongAncestryIndex;
+                    }
+                }
+                // birtum réttan og ranga möguleika í einhverri röð
+                var questionDisplayIndexes = [];
+                for( var j=0; j < 3; j++ ) {
+                    var oneDisplayIndex = randomFromInterval(0,2);
+                    if( $.inArray(oneDisplayIndex, questionDisplayIndexes) > -1 ) {  
+                        j--;  // reynum random aftur
+                    } else {
+                        questionDisplayIndexes.push( oneDisplayIndex );
+                    }
+                }
+                // questionCandidates = { index : {'personId':'...',','question':'...','correct':true|false} }
+                var questionCandidates = {};
+                for( var k=0; k < 3; k++ ) questionCandidates[questionDisplayIndexes[k]] = {};
+                questionCandidates[questionDisplayIndexes[0]].personIndex = wrongAncestryIndexes[0];
+                questionCandidates[questionDisplayIndexes[1]].personIndex = wrongAncestryIndexes[1];
+                questionCandidates[questionDisplayIndexes[2]].personIndex = indexForPersonToPresent;
+                questionCandidates[questionDisplayIndexes[2]].correct = true;
+                var person = this.getPerson( indexForPersonToPresent ); // TODO: redundancy, getPerson called again in askPlaceAndYearOfBirth
+                var questionType = this.getQuestionType( levelIndex );
+                questionCandidates[0].question = this.getQuestion( questionType, questionCandidates[0].personIndex, person.gender );
+                questionCandidates[1].question = this.getQuestion( questionType, questionCandidates[1].personIndex, person.gender );
+                questionCandidates[2].question = this.getQuestion( questionType, questionCandidates[2].personIndex, person.gender );
+                
+                console.log( person.name + ':\n' + questionCandidates[0].question + (questionCandidates[0].correct ? ' -- rétt\n':'\n') + questionCandidates[1].question + (questionCandidates[1].correct ? ' -- rétt\n':'\n') + questionCandidates[2].question + (questionCandidates[2].correct ? ' -- rétt\n':'\n') );
+            } else {
+                // TODO: enginn til að sýna, allt búið, sýnum lokastöðu
+            }
+        };
+        
+        this.processAnswer = function() {
+            
+        };
+        
+        this.presentLevelResults = function() {
+            
+        };
+        
+        function randomFromInterval(from,to) {
+            return Math.floor(Math.random()*(to-from+1)+from);
+        }
         
         this.initialize = function() {
             this.levels = [];
             // setjum upphafs- og endavísa fyrir hvert borð / ættlegg / hæð í trénu
             var levelStartIndex = 1;
             var levelEndIndex = 1;
-            this.levels.push( [levelStartIndex, levelEndIndex, true, 0] );
+            this.levels.push( {'startIndex':levelStartIndex, 'endIndex':levelEndIndex, 'unlocked':true, 'stars':0, 'progress':0, 'completedIndexes':{}} );
             while( levelEndIndex < this.ancestry.length ) {
                 levelStartIndex = 2 * levelStartIndex;
                 levelEndIndex = 2 * levelStartIndex - 1; // (2 * levelStartIndex) er vísir vinstra barns núverandi levelStartIndex
-                this.levels.push( [levelStartIndex, levelEndIndex, false, 0] );
+                this.levels.push( {'startIndex':levelStartIndex, 'endIndex':levelEndIndex, 'unlocked':true, 'stars':0, 'progress':0, 'completedIndexes':{}} );
             }
             
             // this.printAllLevelNames();
         };
         
         
+        this.getPerson = function( personIndex ) {
+            var result;
+            var self = this;
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: '/ie/get',
+                data: { 'session': sessionId, 'id': self.ancestry[personIndex] },
+                contentType: "application/json; charset=iso-8859-1",
+                async: false,
+                success: function( person ) {
+                    result = person;
+                }
+            });
+            return result;
+        };
         
         // debug
         this.printAllLevelNames = function() {
             var self = this;
             $.each( self.levels, function( index, oneLevel ) {
                 console.log('level ' + (index+1) + ': ');
-                var oneLevelStartIndex = oneLevel[0];
-                var oneLevelEndIndex = oneLevel[1];
-                for( var i = oneLevelStartIndex; i <= oneLevelEndIndex; i++ ) {
+                for( var i = oneLevel.startIndex; i <= oneLevel.endIndex; i++ ) {
                     $.ajax({
                         type: 'GET',
                         dataType: 'json',
@@ -102,9 +216,9 @@ $(function () {
     }
     
     // TODO: kannski nota sniðmátadót eins og underscore eða mustache
-    function getOneLevelListMarkup( levelTitle, linkTitle ) {
-        var ul = $( '<ul/>', {'data-role': 'listview', 'data-inset':'true', html: '<li>' + levelTitle + '</li>' } );
-        ul.append($('<li/>').append( $('<a/>', {'href':'#', 'data-transition':'slide','text':linkTitle}) ) );
+    function getOneLevelListMarkup( levelIndex, linkTitle ) {
+        var ul = $( '<ul/>', {'class':'levelentry', 'data-role': 'listview', 'data-inset':'true', html: '<li>Borð ' + levelIndex + '</li>' } );
+        ul.append($('<li/>').append( $('<a/>', {'href':'#', 'data-transition':'slide','text':linkTitle, 'data-levelindex':levelIndex}) ) );
         //ul.append( '<li>' + levelTitle + '</li>' );
         return ul;
     }
@@ -112,7 +226,7 @@ $(function () {
         $.each( einnSkyldleikur.levels, function(index, levelData){
             var linkTitle = '';
             if( index == 1 ) { // mamma og pabbi
-                linkTitle = "Foreldrar";
+                linkTitle = "Þú og foreldrar";
             } else if( index == 2 ) { // ömmur og afar
                 linkTitle = "Ömmurnar og afarnir";
             } else if( index == 3 ) { // langömmur og -afar
@@ -128,7 +242,7 @@ $(function () {
                 linkTitle += "langömmurnar og -afarnir";
             }
             if( index > 0 ) {
-                var oneList = getOneLevelListMarkup('Borð '+index, linkTitle);
+                var oneList = getOneLevelListMarkup( index, linkTitle );
                 $('#s-skyldleikur div[data-role="content"]').append( oneList );
                 //oneList.listview().trigger('create');
                 oneList.listview();                
@@ -154,7 +268,9 @@ $(function () {
     }
     
     
-    $("#login").submit(function () {
+    // events
+    
+    $('#login').submit(function () {
         $.ajax({
             type: 'GET',
             dataType: 'text',
@@ -175,6 +291,18 @@ $(function () {
         });
         return false;
     });
+
+    $('ul.levelentry a').live('click', function(event){
+        einnSkyldleikur.presentQuestion( $(this).data('levelindex') );
+    });
+
+    
+/*
+    // stillum af leikinn þegar forsíðan en endurhlaðin
+    $( document ).delegate("#s-skyldleikur", "pageinit", function() {
+        initializeSkyldleikurinn();
+    });
+*/
     
 });
 //})();
