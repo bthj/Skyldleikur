@@ -9,7 +9,7 @@ $(function () {
     "use strict";
     
     // var IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
-    var IEAPIBaseUrl = '/ie';
+    var IEAPIBaseUrl = '/ie/ib_app';
     
     var user;
     var sessionId;
@@ -75,7 +75,7 @@ $(function () {
         };
         
         var questionCandidates;  // = { index : {'personId':'...',','question':'...','correct':true|false} }
-        var levelResults; // = { index: {'correctAnswer':'...', answeredCorrectly:true|false} }
+        var levelResults; // = { index: {'correctAnswer':'...', answeredCorrectly:true|false}, score: 100 }
         var currentQuestion;
         var currentLevelIndex;
         this.startLevel = function( levelIndex ) {
@@ -255,9 +255,8 @@ $(function () {
             $.ajax({
                 type: 'GET',
                 dataType: 'json',
-                url: '/ie/get',
+                url: '/ie/ib_app/get',
                 data: { 'session': sessionId, 'id': self.ancestry[personIndex] },
-                contentType: "application/json; charset=ISO8859-1",
                 async: false,
                 success: function( person ) {
                     result = person;
@@ -275,7 +274,7 @@ $(function () {
                     $.ajax({
                         type: 'GET',
                         dataType: 'json',
-                        url: '/ie/get',
+                        url: '/ie/ib_app/get',
                         data: { 'session': sessionId, 'id': self.ancestry[i] },
                         async: false,
                         success: function( person ) {
@@ -292,7 +291,7 @@ $(function () {
     function initializeSkyldleikurinn() {
         
         // sækjum framættartré og upphafsstillum hlut Skyldleikjar
-        $.getJSON( '/ie/ancestors', { 'session': sessionId, 'id': user.id } )
+        $.getJSON( '/ie/ib_app/ancestors', { 'session': sessionId, 'id': user.id } )
         .done( function( ancestors ) {
             
             einnSkyldleikur = new Skyldleikurinn( ancestors );
@@ -361,7 +360,7 @@ $(function () {
     function setUserFromLogin( loginData ) {
         var sessionAndId = loginData.split(',');
         sessionId = sessionAndId[0];
-        $.getJSON( '/ie/get', { 'session': sessionId, 'id': sessionAndId[1] } )
+        $.getJSON( '/ie/ib_app/get', { 'session': sessionId, 'id': sessionAndId[1] } )
         .done( function( person ) {
             
             user = person;
@@ -381,7 +380,7 @@ $(function () {
         $.ajax({
             type: 'GET',
             dataType: 'text',
-            url: '/ie/login',
+            url: '/ie/ib_app/login',
             data: { 'user': $('#name').val(), 'pwd': $('#password').val() },
             success: function ( loginData ) {
                 if( loginData.indexOf("Invalid") >= 0 ) {
@@ -401,6 +400,15 @@ $(function () {
 
     $('ul.levelentry a').live('click', function(event){
         einnSkyldleikur.startLevel( $(this).data('levelindex') );
+    });
+    
+    
+    // REST þjónusta í ekki-utf-8 ftw!
+    $.ajaxSetup({
+        contentType: "text/plain; charset=iso-8859-1",
+        beforeSend: function(jqXHR) {
+            jqXHR.overrideMimeType("text/plain;charset=iso-8859-1");
+        }
     });
 
     
