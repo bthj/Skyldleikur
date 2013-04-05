@@ -1,6 +1,6 @@
 {
   "name": "skyldleikur",
-  "version": "0.1.0-17",
+  "version": "0.1.0-18",
   "dependencies": {
     "node-static": "0.6.7",
     "restler": "2.0.1",
