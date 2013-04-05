@@ -19,18 +19,25 @@
         #s-skyldleikur-spurn .ui-controlgroup-controls a {
             width:19%;
         }
+        #step-buttons .ui-btn-inner {
+            padding-left: 25px;
+        }
+        #s-skyldleikur-stada a {
+            cursor:default;
+        }
     </style>
 </head> 
+    
 <body> 
 
-<div data-role="page" id="page-login">
+<div data-role="page" id="s-login">
 
 	<div data-role="header">
 		<h1>Skyldleikur</h1>
 	</div><!-- /header -->
 
 	<div data-role="content">	
-		<h1>Lát skyldleikana hefjast!!!</h1>
+		<h1>Lát skyldleika hefjast!</h1>
         <form action="/login" method="get" id="login">
             <label for="name">Notandanafn*</label>
             <input type="text" name="name" id="name" value=""  />
@@ -53,44 +60,50 @@
     
     <div data-role="content">
         <h1>Velkomin(n) til Skyldleika!</h1>
-        <p>Eitt borð fyrir hvern ættlið.  Kláraðu hvert borð með því að svara einni spurningu rétt um alla í ættliðnum.</p>
+        <p>Hvernig ertu í ættliðunum?</p>
+        <div id="levels-container"></div>
     </div>
 </div>
     
     
 <div data-role="page" id="s-skyldleikur-spurn">
     <div data-role="header">
-        <h1>Ættleggur</h1>
+        <h1>Ættliður</h1>
     </div>
     <div data-role="content">
-        <div data-role="controlgroup" data-type="horizontal" data-mini="true">
-            <a href="#" id="stepinfo1" data-role="button" data-iconpos="left">&nbsp;</a>
-            <a href="#" id="stepinfo2" data-role="button" data-iconpos="left">&nbsp;</a>
-            <a href="#" id="stepinfo3" data-role="button" data-iconpos="left">&nbsp;</a>
-            <a href="#" id="stepinfo4" data-role="button" data-iconpos="left">&nbsp;</a>
-            <a href="#" id="stepinfo5" data-role="button" data-iconpos="left">&nbsp;</a>
-        </div>
-        <br>
+        <div id="step-buttons"></div>
         <h1 id="question" style="text-align:center;">Björn Þór Jónsson</h1>
-        <br>
         <div id="answer-buttons"></div>
-<!--
-        <a data-role="button" id="answer1" data-candidate="0" data-iconpos="right">Spurning 1</a>
-        <br>
-        <a data-role="button" id="answer2" data-candidate="1" data-iconpos="right">Spurning 2</a>
-        <br>
-        <a data-role="button" id="answer3" data-candidate="2" data-iconpos="right">Spurning 3</a>
--->
+        
+        <div data-role="popup" id="correctPopup" class="ui-content" data-theme="d" data-transition="pop">
+            <p>Rétt!</p>
+        </div>
     </div>
-    
 </div>
     
-<div data-role="page" id="s-skyldleikur-skref">
-    
-</div>
     
 <div data-role="page" id="s-skyldleikur-stada">
-    
+    <div data-role="header">
+        <h1>Úrslit</h1>
+    </div>
+    <div data-role="content">
+
+        <ul>
+            <li id="results-count-correct">3 af 5 svarað rétt!</li>
+            <li id="results-mean-answer-time">Meðalsvartími 2.1 sekúndur.</li>
+            <li id="results-total-points"><strong>345 stig</strong> - 65 stigum minna en hæsta skor: 400</li>
+        </ul>
+        
+        <a href="" data-role="button" data-icon="refresh" data-theme="e" id="re-run-level">Aðra umferð</a>
+        <br>
+
+        <div id="results-container">
+        
+        </div>
+        
+        <a href="#s-skyldleikur" data-role="button" data-icon="bars" data-theme="b">Liðirnir</a>
+
+    </div>
 </div>
 
 </body>

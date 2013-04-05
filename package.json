@@ -1,6 +1,6 @@
 {
   "name": "skyldleikur",
-  "version": "0.1.0-14",
+  "version": "0.1.0-17",
   "dependencies": {
     "node-static": "0.6.7",
     "restler": "2.0.1",
@@ -10,6 +10,9 @@
     "proxy-by-url": "0.0.x"
   },
   "subdomain": "skyldleikur",
+  "domains": [
+    "skyldleikur.nemur.net"
+  ],
   "scripts": {
     "start": "httpServer.js"
   },

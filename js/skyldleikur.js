@@ -35,8 +35,34 @@ $(function () {
         this.levels = [];
         
         this.questionsPerLevel = 5;
-        this.questionTypes = {
-            0 : 'askPlaceAndYearOfBirth'
+        this.questionsForLevel = {
+            1 : [
+                this.askPlaceAndYearOfBirth,
+                this.askSibling,
+                this.askCountSiblings,
+                this.askChild,
+                this.askGrandChild,
+                this.askCountChildren,
+                this.askCountGrandChildren,
+                this.askParent,
+                this.askAge
+                ],
+            2 : [
+                this.askPlaceAndYearOfBirth,
+                this.askSibling,
+                this.askCountSiblings,
+                this.askChild,
+                this.askGrandChild,
+                this.askCountChildren,
+                this.askCountGrandChildren,
+                this.askParent,
+                this.askAge
+                ],
+            3 : [
+                this.askPlaceAndYearOfBirth,
+                this.askRelatedVia,
+                this.askAge
+                ]
         };
         this.getQuestionType = function( levelIndex ) {
             // TODO:  ólíkar tegundir spurninga eftir vægi
@@ -64,7 +90,19 @@ $(function () {
         this.askSibling = function( personIndex, gender ) {
             
         };
+        this.askCountSiblings = function( personIndex, gender ) {
+            
+        };
         this.askChild = function( personIndex, gender ) {
+            
+        };
+        this.askGrandChild = function( personIndex, gender ) {
+            
+        };
+        this.askCountChildren = function( personIndex, gender ) {
+            
+        };
+        this.askCountGrandChildren = function( personIndex, gender ) {
             
         };
         this.askParent = function( personIndex, gender ) {
@@ -73,28 +111,39 @@ $(function () {
         this.askRelatedVia = function( personIndex, gender ) {
             
         };
+        this.askAge = function( personIndex, gender ) {
+            
+        };
+        this.askMate = function( personIndex, gender ) {
+            
+        };
         
         var questionCandidates;  // = { index : {'personId':'...',','question':'...','correct':true|false} }
-        var levelResults; // = { index: {'correctAnswer':'...', answeredCorrectly:true|false}, score: 100 }
-        var currentQuestion;
-        var currentLevelIndex;
+        var levelResults; // = { index: {'person':'...','question':'...','correctAnswer':'...', answeredCorrectly:true|false}, startTime:1000, endTime:2000, score: 100 }
+        this.currentQuestion = 0;
+        this.currentLevelIndex = 0;
         this.startLevel = function( levelIndex ) {
+            $.mobile.loading( 'show', { text: 'Sæki spurningu', textVisible:true});
             levelResults = {};
-            currentQuestion = 0;
-            currentLevelIndex  = levelIndex;
+            this.currentQuestion = 0;
+            this.currentLevelIndex  = levelIndex;
+            this.addInfoSteps();
             this.presentQuestion( levelIndex );
+            $('#s-skyldleikur-spurn h1:first').text('Ættliður '+ levelIndex);
         };
         this.presentQuestion = function( levelIndex ) {
-            currentQuestion++;
+            this.currentQuestion++;
             var oneLevel = this.levels[levelIndex];
             var indexForPersonToPresent;
             var countCompletedPersons = oneLevel.endIndex - (oneLevel.startIndex-1);
             if( countCompletedPersons != oneLevel.progress ) {
                 do {
                     indexForPersonToPresent = randomFromInterval( oneLevel.startIndex, oneLevel.endIndex );
+// TODO: completed questions
                 } while( oneLevel.completedIndexes[indexForPersonToPresent] );  // ef höfum afgreitt einstakling, tökum næsta
             }
-            if( indexForPersonToPresent ) {
+            
+            if( this.currentQuestion <= this.questionsPerLevel ) {
                 // sækjum ranga möguleika
                 var ancestryStartIndex;
                 if( levelIndex == 1 ) { // við erum að skoða foreldrana, tökum þig með líka
@@ -142,12 +191,17 @@ $(function () {
 //                $('#answer2').text(questionCandidates[1].question);
 //                $('#answer3').text(questionCandidates[2].question);
                 this.addAnswerButtons();
+                levelResults[this.currentQuestion] = {};
+                levelResults[this.currentQuestion].person = person.name;
+                levelResults[this.currentQuestion].question = ''; // TODO
+                levelResults[this.currentQuestion].startTime = new Date().getTime();
+                $.mobile.loading( 'hide' );
                 $.mobile.changePage('#s-skyldleikur-spurn');
                 //$('#answer1, #answer2, #answer3').button('refresh');
                 //$('#answer1, #answer2, #answer3').trigger('create');
 
             } else {  // allir laukar afgreiddir, sýnum lokastöðu
-                
+                $.mobile.loading( 'show', { text: 'Tek saman úrslit', textVisible:true});
                 this.presentLevelResults();
             }
         };
@@ -155,17 +209,32 @@ $(function () {
         this.addAnswerButtons = function() {
             var answerButtonsContainer = $('#answer-buttons');
             answerButtonsContainer.empty();
-            $.each( questionCandidates, function( key, oneCandidate ){
+            //$.each( questionCandidates, function( key, oneCandidate ){
+            for( var k=1; k <= 3; k++ ) {
                 var oneAnswer = $( '<a/>', {
                     'href':'#','data-role':'button','data-iconpos':'right',
-                    'id':'answer'+key, 'class':'answer-button', 'data-candidate':key,
-                    'text':questionCandidates[key].question
+                    'id':'answer'+k, 'class':'answer-button', 'data-candidate':k,
+                    'text':questionCandidates[k].question
                 });
                 answerButtonsContainer.append( oneAnswer ).append('<br/>');
-            });
+            }
+            //});
             answerButtonsContainer.trigger('create');
         };
+        
+        this.addInfoSteps = function(){
+            var stepButtonsContainer = $('#step-buttons').empty();
+            stepButtonsContainer.empty();
+            var controlGroup = $('<div/>', {'data-role':'controlgroup','data-type':'horizontal', 'data-mini':'true'});
+            for( var i=1; i <= 5; i++ ) {
+                var oneStep = $('<a/>',{'href':'#', 'id':'stepinfo'+i,'data-role':'button','data-iconpos':'left'});
+                controlGroup.append( oneStep );
+            }
+            stepButtonsContainer.append(controlGroup);
+            stepButtonsContainer.trigger("create");
+        };
 
+        
         
         ////// process question
         
@@ -186,37 +255,76 @@ $(function () {
         };
         this.setProgressStatus = function( answeredCorrectly ) {
             if( answeredCorrectly ) {
-                $('#stepinfo'+currentQuestion).buttonMarkup({theme:'b', icon:'check'});
-                $('#stepinfo'+currentQuestion+' .ui-btn-text').text('rétt');
+                $('#stepinfo'+this.currentQuestion).buttonMarkup({theme:'b', icon:'check'});
+                $('#stepinfo'+this.currentQuestion+' .ui-btn-text').text(':-)');
             } else {
-                $('#stepinfo'+currentQuestion).buttonMarkup({theme:'a', icon:'delete'});
-                $('#stepinfo'+currentQuestion+' .ui-btn-text').text('rangt');
+                $('#stepinfo'+this.currentQuestion).buttonMarkup({theme:'a', icon:'delete'});
+                $('#stepinfo'+this.currentQuestion+' .ui-btn-text').text(':-(');
             }
         };
         this.processAnswer = function( button ) {
             // TODO: handle if multiple idendical choices
-            if( undefined === levelResults[currentQuestion] ) {
+            var self = this;
+            if( undefined === levelResults[this.currentQuestion].endTime ) {
+                levelResults[this.currentQuestion].endTime = new Date().getTime();
                 var selectedCandicateIndex = button.data('candidate');
                 var answeredCorrectly = questionCandidates[selectedCandicateIndex].correct;
                 if( answeredCorrectly ) {
                     self.highlightCorrectAnswer( selectedCandicateIndex );
+                    $('#correctPopup').popup('open', {theme: "b", overlayTheme: "b", positionTo: button, transition: "pop", x: "10" });
                 } else {
                     self.highlightWrongAnswer( selectedCandicateIndex );
                     self.highlightCorrectAnswer();
                 }
                 self.setProgressStatus( answeredCorrectly );
                 
-                levelResults[currentQuestion] = {};
-                levelResults[currentQuestion].correctAnswer = questionCandidates[self.getCorrectAnswerIndex()];
-                levelResults[currentQuestion].answeredCorrectly = answeredCorrectly;
+                levelResults[this.currentQuestion].correctAnswer = questionCandidates[self.getCorrectAnswerIndex()].question;
+                levelResults[this.currentQuestion].answeredCorrectly = answeredCorrectly;
                 
-                setTimeout( function(){self.presentQuestion(currentLevelIndex);}, 3000);       
+                setTimeout( function(){
+                    $.mobile.loading( 'show', { text: 'Sæki næstu spurningu', textVisible:true});
+                    self.presentQuestion(self.currentLevelIndex);
+                }, 1000);
             }
         };
         
+        
+        
+        ////// level results
+        
         this.presentLevelResults = function() {
-            
+            var answerContainer = $('#results-container').empty();
+            var resultList = $('<ul/>', {'data-role':'listview', 'data-inset':'true'});
+            var correctCount = 0;
+            var totalAnswerTime = 0;
+            var totalPoints = 0;
+            $.each(levelResults, function(questionNo, result){
+                var oneListItem = $('<li/>');
+                var splitLeft = $('<a/>', {'href':'#'} );
+                splitLeft.append( $('<h2/>', {'text': levelResults[questionNo].person}) );
+                splitLeft.append( $('<p/>', {'text': levelResults[questionNo].correctAnswer}) );
+                oneListItem.append( splitLeft );
+                var oneAnswerTime = levelResults[questionNo].endTime - levelResults[questionNo].startTime;
+                totalAnswerTime += oneAnswerTime;
+                if( levelResults[questionNo].answeredCorrectly ) {
+                    oneListItem.append( $('<a/>', {'href':'#', 'data-theme':'b', 'data-icon':'check'}) );
+                    totalPoints += Math.round(100 / (oneAnswerTime/1000));
+                    correctCount++;
+                } else {
+                    oneListItem.append( $('<a/>', {'href':'#', 'data-theme':'a', 'data-icon':'delete'}) );
+                }
+                resultList.append( oneListItem );
+            });
+            $('#results-count-correct').text(correctCount + ' af 5 svarað rétt!');
+            var meanAnswerTime = ((totalAnswerTime/1000) / 5).toFixed(1);
+            $('#results-mean-answer-time').text('Meðalsvartími '+meanAnswerTime+' sekúndur');
+            $('#results-total-points').find('strong:first').text(totalPoints+' stig');
+            $.mobile.changePage('#s-skyldleikur-stada');
+            answerContainer.append( resultList );
+            answerContainer.trigger('create');
         };
+        
+        
         
         function randomFromInterval(from,to) {
             return Math.floor(Math.random()*(to-from+1)+from);
@@ -300,7 +408,7 @@ $(function () {
             
             var greeting;
             switch( user.gender ) {
-                case 0:
+                case 2:
                     greeting = 'Velkomin, ';
                     break;
                 case 1:
@@ -310,7 +418,7 @@ $(function () {
                     greeting = 'Velkomin/n, ';
                     break;
             }
-            $('#s-skyldleikur div[data-role="content"] h1').text(greeting + user.name + ', til Skyldleika!');
+            $('#s-skyldleikur div[data-role="content"] h1').text(greeting + user.name + '!');
             showLevels();
         })
         .fail(function( jqxhr, textStatus, error ) {
@@ -323,12 +431,14 @@ $(function () {
     
     // TODO: kannski nota sniðmátadót eins og underscore eða mustache
     function getOneLevelListMarkup( levelIndex, linkTitle ) {
-        var ul = $( '<ul/>', {'class':'levelentry', 'data-role': 'listview', 'data-inset':'true', html: '<li>Borð ' + levelIndex + '</li>' } );
+        var ul = $( '<ul/>', {'class':'levelentry', 'data-role': 'listview', 'data-inset':'true', html: '<li>Liður ' + levelIndex + '</li>' } );
         ul.append($('<li/>').append( $('<a/>', {'href':'#', 'data-transition':'slide','text':linkTitle, 'data-levelindex':levelIndex}) ) );
         //ul.append( '<li>' + levelTitle + '</li>' );
         return ul;
     }
     function showLevels() {
+        var levelsContainer = $('#levels-container');
+        levelsContainer.empty();
         $.each( einnSkyldleikur.levels, function(index, levelData){
             var linkTitle = '';
             if( index == 1 ) { // mamma og pabbi
@@ -349,7 +459,7 @@ $(function () {
             }
             if( index > 0 ) {
                 var oneList = getOneLevelListMarkup( index, linkTitle );
-                $('#s-skyldleikur div[data-role="content"]').append( oneList );
+                levelsContainer.append( oneList );
                 //oneList.listview().trigger('create');
                 oneList.listview();                
             }
@@ -377,6 +487,7 @@ $(function () {
     // events
     
     $('#login').submit(function () {
+        $.mobile.loading( 'show', { text: 'Skrái inn', textVisible:true});
         $.ajax({
             type: 'GET',
             dataType: 'text',
@@ -384,7 +495,8 @@ $(function () {
             data: { 'user': $('#name').val(), 'pwd': $('#password').val() },
             success: function ( loginData ) {
                 if( loginData.indexOf("Invalid") >= 0 ) {
-                    alert('login failed');    
+                    alert('Innskráning tókst ekki');
+                    $.mobile.loading( 'hide' );
                 } else {
                     setUserFromLogin( loginData );
                 }
@@ -401,6 +513,9 @@ $(function () {
     $('ul.levelentry a').live('click', function(event){
         einnSkyldleikur.startLevel( $(this).data('levelindex') );
     });
+    $('#re-run-level').click(function(){
+        einnSkyldleikur.startLevel( einnSkyldleikur.currentLevelIndex );
+    });
     
     
     // REST þjónusta í ekki-utf-8 ftw!
@@ -410,14 +525,21 @@ $(function () {
             jqXHR.overrideMimeType("text/plain;charset=iso-8859-1");
         }
     });
-
     
-/*
+
     // stillum af leikinn þegar forsíðan en endurhlaðin
     $( document ).delegate("#s-skyldleikur", "pageinit", function() {
-        initializeSkyldleikurinn();
+        if( einnSkyldleikur ) {
+            showLevels();
+        } else {
+            $.mobile.changePage('#s-login');
+        }
     });
-*/
+    $( document ).delegate("#s-skyldleikur-spurn, #s-skyldleikur-stada", "pageinit", function() {
+        if( ! einnSkyldleikur ) {
+            $.mobile.changePage('#s-login');
+        }
+    });    
     
 });
 //})();
