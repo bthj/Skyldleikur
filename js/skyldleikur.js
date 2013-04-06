@@ -8,6 +8,14 @@ $(function () {
 //(function() {
     "use strict";
     
+    var isLocalStorage;
+    try {
+        isLocalStorage = ('localStorage' in window && window.localStorage !== null);
+    } catch (e) {
+        isLocalStorage = false;
+    }
+    var scoreStorageKey = 'skyldleikurScore';
+    
     // var IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
     var IEAPIBaseUrl = '/ie/ib_app';
     var missingAncestorId = 999999;
@@ -34,6 +42,22 @@ $(function () {
          *      {2:false, 3:true, osfrv...}
         */
         this.levels = [];
+        
+        
+        this.getScoreFromLocalStorage = function() {
+            if( isLocalStorage ) {
+                var currentScore = localStorage[scoreStorageKey];
+                if( ! currentScore ) currentScore = JSON.stringify({});
+                return JSON.parse( currentScore );
+            } else {
+                return undefined;
+            }
+        };
+        this.saveScoreToLocalStorage = function( score ) {
+            if( isLocalStorage ) {
+                localStorage[scoreStorageKey] = JSON.stringify( score );
+            }
+        };
 
         
         this.getAllButLastName = function( name ) {
@@ -57,12 +81,12 @@ $(function () {
                 if( relations.length ) {
                     var oneRelation = relations[randomFromInterval(0, relations.length-1)];
                     question.option = self.getAllButLastName( oneRelation.name );
-                    query.correctOptions = [];
                     if( query.canFailWithSelf ) {
-                        if( $.inArray(question.option, query.correctOptions)  ) {
+                        if( $.inArray(question.option, query.correctOptions) > -1 ) {
                             questionCandidates[query.questionPosition].correct = true;
                         }
                     } else {
+                        query.correctOptions = [];
                         $.each( relations, function( key, relationObject ){
                             query.correctOptions.push( self.getAllButLastName( relationObject.name ) );
                         });
@@ -72,7 +96,7 @@ $(function () {
                 } else {
                     if( query.canFailWithSelf ) {
                         question.option = self.getAllButLastName( query.person.name );
-                        if( $.inArray(question.option, query.correctOptions) ) {
+                        if( $.inArray(question.option, query.correctOptions) > -1 ) {
                             questionCandidates[query.questionPosition].correct = true;
                         }
                         query.question = question;
@@ -222,7 +246,7 @@ $(function () {
                 {'functionRef':this.askAge, 'functionName':'askAge'} // 8
         ];
         this.questionsForLevel = {
-            1 :  allQuestionTypes,
+            1 : allQuestionTypes,
             2 : allQuestionTypes,
             3 : [   allQuestionTypes[0], allQuestionTypes[3], allQuestionTypes[8],
                     {'functionRef':this.askRelatedVia, 'functionName':'askRelatedVia'}
@@ -508,6 +532,28 @@ $(function () {
             var meanAnswerTime = ((totalAnswerTime/1000) / 5).toFixed(1);
             $('#results-mean-answer-time').html('meðalsvartími <strong>'+meanAnswerTime+' sekúndur</strong>');
             $('#results-total-points').text(totalPoints+' stig');
+            
+            var highscore = self.getScoreFromLocalStorage();
+            if( highscore ) { 
+                var previousHighscore = highscore[self.currentLevelIndex];
+                if( previousHighscore ) {
+                    if( totalPoints > previousHighscore ) {
+                        $('#results-highscore').text('Nýtt met!');
+                        highscore[self.currentLevelIndex] = totalPoints;
+                    } else if( totalPoints == previousHighscore ) {
+                        $('#results-highscore').text('Jafnaðir fyrra met!');
+                    } else {
+                        $('#results-highscore').text('hingað til náð hæst '+previousHighscore+' stigum.');
+                    }
+                } else {
+                    highscore[self.currentLevelIndex] = totalPoints;
+                    $('#results-highscore').text('Getur þú betur?');
+                }
+                self.saveScoreToLocalStorage( highscore );
+            } else { // localStorage ekki til staðar
+                $('#results-highscore').text('');
+            }
+            
             $.mobile.changePage('#s-skyldleikur-stada');
             answerContainer.append( resultList );
             answerContainer.trigger('create');
@@ -606,9 +652,12 @@ $(function () {
     }
     
 
-    function getOneLevelListMarkup( levelIndex, linkTitle ) {
+    function getOneLevelListMarkup( levelIndex, linkTitle, score ) {
         var ul = $( '<ul/>', {'class':'levelentry', 'data-role': 'listview', 'data-inset':'true', html: '<li>Liður ' + levelIndex + '</li>' } );
-        ul.append($('<li/>').append( $('<a/>', {'href':'#', 'data-transition':'slide','text':linkTitle, 'data-levelindex':levelIndex}) ) );
+        ul.append($('<li/>').append( $('<a/>', {
+            'href':'#', 'data-transition':'slide',
+            'html':linkTitle + (score ? ' <span class="ui-li-count">'+score+' stig</span>' : ''), 
+            'data-levelindex':levelIndex}) ) );
         return ul;
     }
     function levelHasAnyPerson( levelData ) {
@@ -622,6 +671,8 @@ $(function () {
     function showLevels() {
         var levelsContainer = $('#levels-container');
         levelsContainer.empty();
+        var highscore = einnSkyldleikur.getScoreFromLocalStorage();
+        var sumScore = 0;
         $.each( einnSkyldleikur.levels, function(index, levelData){
             var linkTitle = '';
             if( index == 1 ) { // mamma og pabbi
@@ -641,12 +692,21 @@ $(function () {
                 linkTitle += "langömmurnar og -afarnir";
             }
             if( index > 0 && levelHasAnyPerson(levelData) ) {
-                var oneList = getOneLevelListMarkup( index, linkTitle );
+                var score;
+                if( highscore ) {
+                    score = highscore[index];
+                    if( undefined !== score ) sumScore += score;
+                }
+                var oneList = getOneLevelListMarkup( index, linkTitle, score );
                 levelsContainer.append( oneList );
                 oneList.listview();                
             }
         });
-        
+        if( sumScore > 0 ) {
+            $('#sum-score').html('&#9830; í dag kanntu ættliðina upp á '+sumScore+' stig &#9830;');
+        } else {
+            $('#sum-score').text('Hvernig ertu í ættliðunum?');
+        }
     }
     
     function setUserFromLogin( loginData ) {
@@ -714,7 +774,7 @@ $(function () {
 
 
     // stillum af leikinn þegar forsíðan en endurhlaðin
-    $( document ).delegate("#s-skyldleikur", "pageinit", function() {
+    $( document ).delegate("#s-skyldleikur", "pagebeforeshow", function() {
         if( einnSkyldleikur ) {
             showLevels();
         } else {
@@ -725,7 +785,14 @@ $(function () {
         if( ! einnSkyldleikur ) {
             $.mobile.changePage('#s-login');
         }
-    });    
+    });
+    
+    // falin síða til að hreinsa stig
+    $( document ).delegate("#s-skyldleikur-reset", "pageinit", function() {
+        if( isLocalStorage ) {
+            localStorage.removeItem(scoreStorageKey);
+        }
+    });
     
 });
 //})();
