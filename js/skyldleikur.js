@@ -351,6 +351,7 @@ $(function () {
             
             if( this.currentQuestion <= this.questionsPerLevel ) {
                 $('#correctPopup').popup('close');
+                $.mobile.loading( 'show', { text: 'Sæki spurningu', textVisible:true});
                 
                 var oneLevel = this.levels[levelIndex];
                 var indexForPersonToPresent;
@@ -408,7 +409,7 @@ $(function () {
                 });
 
             } else {  // allir laukar afgreiddir, sýnum lokastöðu
-
+                $.mobile.loading( 'show', { text: 'Tek saman', textVisible:true});
                 this.presentLevelResults();
             }
         };
@@ -471,6 +472,19 @@ $(function () {
                 $('#stepinfo'+this.currentQuestion+' .ui-btn-text').text(':-(');
             }
         };
+        this.correctMessages = ['laukrétt!', 'frábært!', 'nákvæmlega!', 'vel gert!', 'snilld!'];
+        this.getCorrectMessage = function() {
+            return self.correctMessages[ randomFromInterval(0, self.correctMessages.length-1) ];
+        };
+        this.correctSounds = [
+            new Audio('assets/audio/right1.ogg'), new Audio('assets/audio/right2.ogg'), new Audio('assets/audio/right3.ogg')];
+        this.incorrectSounds = [new Audio('assets/audio/wrong1.ogg'), new Audio('assets/audio/wrong2.ogg')];
+        this.playCorrectSound = function() {
+            self.correctSounds[randomFromInterval(0,self.correctSounds.length-1)].play();
+        };
+        this.playIncorrectSound = function() {
+            self.incorrectSounds[randomFromInterval(0,self.incorrectSounds.length-1)].play();
+        };
         this.processAnswer = function( button ) {
             // TODO: handle if multiple idendical choices
             var self = this;
@@ -480,10 +494,13 @@ $(function () {
                 var answeredCorrectly = questionCandidates[selectedCandicateIndex].correct;
                 var correctCandidate;
                 if( answeredCorrectly ) {
+                    self.playCorrectSound();
                     self.highlightCorrectAnswer( selectedCandicateIndex );
+                    $('#correctPopup p').text( this.getCorrectMessage() );
                     $('#correctPopup').popup('open', {theme: "b", overlayTheme: "b", positionTo: button, transition: "pop", x: "10" });
                     correctCandidate = questionCandidates[selectedCandicateIndex];
                 } else {
+                    self.playIncorrectSound();
                     self.highlightWrongAnswer( selectedCandicateIndex );
                     self.highlightCorrectAnswer();
                     correctCandidate = questionCandidates[self.getCorrectAnswerIndex()];
@@ -494,7 +511,7 @@ $(function () {
                 levelResults[this.currentQuestion].answeredCorrectly = answeredCorrectly;
                 
                 setTimeout( function(){
-                    $.mobile.loading( 'show', { text: 'Sæki...', textVisible:true});
+                    //$.mobile.loading( 'show', { text: 'Sæki...', textVisible:true});
                     self.presentQuestion(self.currentLevelIndex);
                 }, 1000);
             }
@@ -528,7 +545,7 @@ $(function () {
                 }
                 resultList.append( oneListItem );
             });
-            $('#results-count-correct').html('<strong>'+correctCount + ' af 5</strong> svarað rétt');
+            $('#results-count-correct').html('<strong>'+correctCount + ' af 5</strong> rétt');
             var meanAnswerTime = ((totalAnswerTime/1000) / 5).toFixed(1);
             $('#results-mean-answer-time').html('meðalsvartími <strong>'+meanAnswerTime+' sekúndur</strong>');
             $('#results-total-points').text(totalPoints+' stig');
@@ -703,7 +720,7 @@ $(function () {
             }
         });
         if( sumScore > 0 ) {
-            $('#sum-score').html('&#9830; í dag kanntu ættliðina upp á '+sumScore+' stig &#9830;');
+            $('#sum-score').html('&#9830; '+sumScore+' stiga skyldleikni &#9830;');
         } else {
             $('#sum-score').text('Hvernig ertu í ættliðunum?');
         }
