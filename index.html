@@ -60,7 +60,7 @@
     
     <div data-role="content">
         <h1>Velkomin(n) til Skyldleika!</h1>
-        <p>Hvernig ertu í ættliðunum?</p>
+        <p style="text-align:center;">Hvernig ertu í ættliðunum?</p>
         <div id="levels-container"></div>
     </div>
 </div>
@@ -88,11 +88,11 @@
     </div>
     <div data-role="content">
 
-        <ul>
-            <li id="results-count-correct">3 af 5 svarað rétt!</li>
-            <li id="results-mean-answer-time">Meðalsvartími 2.1 sekúndur.</li>
-            <li id="results-total-points"><strong>345 stig</strong> - 65 stigum minna en hæsta skor: 400</li>
-        </ul>
+        <div style="text-align:center;">
+            <span id="results-count-correct" >&nbsp;</span> - <span id="results-mean-answer-time">&nbsp;</span>
+            <h2 id="results-total-points">&nbsp;</h2>
+            <p id="results-highscore">&nbsp;</p>
+        </div>
         
         <a href="" data-role="button" data-icon="refresh" data-theme="e" id="re-run-level">Aðra umferð</a>
         <br>
