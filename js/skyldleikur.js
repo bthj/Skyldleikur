@@ -10,6 +10,7 @@ $(function () {
     
     // var IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
     var IEAPIBaseUrl = '/ie/ib_app';
+    var missingAncestorId = 999999;
     
     var user;
     var sessionId;
@@ -50,7 +51,7 @@ $(function () {
         
         this.askRelation = function( query, title, restUrl ) {
             var question = {};
-            question.title = title;
+            if( ! query.title ) question.title = title; else question.title = query.title;
             $.getJSON( restUrl, { 'session': sessionId, 'id': query.person.id } )
             .done( function( relations ) {
                 if( relations.length ) {
@@ -85,20 +86,26 @@ $(function () {
         };
         this.askSibling = function( query ) {
             
-            self.askRelation( query, 'á systkini sem heitir', '/ie/ib_app/siblings' );
+            self.askRelation( 
+                query, 
+                (isEmpty(query.person.dod) ? 'á':'átti')+' systkini sem heitir', 
+                '/ie/ib_app/siblings' );
         };
         this.askChild = function( query ) {
             
-            self.askRelation( query, 'á barn sem heitir', '/ie/ib_app/children' );
+            self.askRelation( 
+                query, 
+                (isEmpty(query.person.dod) ? 'á':'átti')+' barn sem heitir', 
+                '/ie/ib_app/children' );
         };
         
         this.askCountRelations = function( query, title, optionAppendix, restUrl ) {
             var question = {};
-            question.title = title;
+            if( ! query.title ) question.title = title; else question.title = query.title;
             if( query.canFailWithSelf ) {
                 do {
                     question.option = randomFromInterval(1, 10) + optionAppendix;
-                } while( ! $.inArray(question.option, query.correctOptions) );
+                } while( $.inArray(question.option, query.correctOptions) > -1 );
                 query.question = question;
                 query.callback( query );
             } else {
@@ -118,11 +125,13 @@ $(function () {
         };
         this.askCountSiblings = function( query ) {
             
-            self.askCountRelations( query, 'á', ' systkini', '/ie/ib_app/siblings' );
+            self.askCountRelations( 
+                query, (isEmpty(query.person.dod) ? 'á':'átti'), ' systkini', '/ie/ib_app/siblings' );
         };
         this.askCountChildren = function( query ) {
             
-            self.askCountRelations( query, 'á', ' börn', '/ie/ib_app/children' );
+            self.askCountRelations( 
+                query, (isEmpty(query.person.dod) ? 'á':'átti'), ' börn', '/ie/ib_app/children' );
         };
         
         this.askGrandChild = function( query ) {
@@ -149,7 +158,9 @@ $(function () {
             return new Date( yearString.slice(0,4)+'-'+yearString.slice(4,6)+'-'+yearString.slice(6,8) );
         };
         this.getAppendixFromAge = function( age ){
-            if( age > 11 && (age % 10) == 1 ) {
+            if( age > 100 ) {
+                return ' árum';
+            } else if( age > 11 && (age % 10) == 1 ) {
                 return ' árs';
             } else {
                 return ' ára';
@@ -177,10 +188,17 @@ $(function () {
                         self.getDateFromYearString(query.person.dob), 
                         new Date() );
                 }
+                if( age > 100 ) {
+                    question.title = 'fæddist fyrir';
+                }
                 question.option = age + self.getAppendixFromAge(age);
                 query.correctOptions = [question.option];
             }
-            query.question = question;
+            if( isNaN(age) ) {
+                query.question = undefined;
+            } else {
+                query.question = question;
+            }
             query.callback( query );
         };
         
@@ -191,43 +209,32 @@ $(function () {
         
         
         this.questionsPerLevel = 5;
+        var allQuestionTypes = [
+
+                {'functionRef':this.askPlaceAndYearOfBirth, 'functionName':'askPlaceAndYearOfBirth'}, // 0
+                {'functionRef':this.askSibling, 'functionName':'askSibling'},
+                {'functionRef':this.askChild, 'functionName':'askChild'},
+                {'functionRef':this.askCountSiblings, 'functionName':'askCountSiblings'}, // 3
+                {'functionRef':this.askCountChildren, 'functionName':'askCountChildren'},
+                {'functionRef':this.askGrandChild, 'functionName':'askGrandChild'},
+                {'functionRef':this.askCountGrandChildren, 'functionName':'askCountGrandChildren'},
+                {'functionRef':this.askParent, 'functionName':'askParent'},
+                {'functionRef':this.askAge, 'functionName':'askAge'} // 8
+        ];
         this.questionsForLevel = {
-            1 : [
-                this.askPlaceAndYearOfBirth,
-                this.askSibling,
-                this.askChild,
-                this.askCountSiblings,
-                this.askCountChildren,
-                this.askGrandChild,
-                this.askCountGrandChildren,
-                this.askParent,
-                this.askAge
-                ],
-            2 : [
-                this.askPlaceAndYearOfBirth,
-                this.askSibling,
-                this.askChild,
-                this.askCountSiblings,
-                this.askCountChildren,
-                this.askGrandChild,
-                this.askCountGrandChildren,
-                this.askParent,
-                this.askAge
-                ],
-            3 : [
-                this.askPlaceAndYearOfBirth,
-                this.askRelatedVia,
-                this.askAge
+            1 :  allQuestionTypes,
+            2 : allQuestionTypes,
+            3 : [   allQuestionTypes[0], allQuestionTypes[3], allQuestionTypes[8],
+                    {'functionRef':this.askRelatedVia, 'functionName':'askRelatedVia'}
                 ]
         };
         
         // askedForPerson -> { personId : [questionFunction, questionFunction]}, 
         //  svo sömu spurningar sé ekki spurt oftar en einu sinni fyrir hvern.
-//        var askedForPerson = {}; 
+        var askedForPerson = {}; 
 
         // veljum tegund spurningar af handahófi 
         this.getQuestionFunction = function( levelIndex ) {
-            if( levelIndex > 3 ) levelIndex = 3;
             var functionIndex = randomFromInterval( 0, this.questionsForLevel[levelIndex].length-1 );
             return this.questionsForLevel[levelIndex][functionIndex];
         };
@@ -255,12 +262,17 @@ $(function () {
             }            
         };
         this.askForTarget = function( query ) {
-            var questionFunction = self.getQuestionFunction( query.levelIndex );
-//            if( undefined === askedForPerson[query.person.id] ) askedForPerson[query.person.id] = [];
-//            if( $.inArray( questionFunction, askedForPerson[query.person.id] ) > -1 ) {
-//                self.askForTarget( query ); // höfum spurt áður, finnum aðra
-//            } else {
-//                askedForPerson[query.person.id].push( questionFunction );
+            var questionLevelIndex = query.levelIndex > 3 ? 3 : query.levelIndex;
+            var questionFunctionInfo = self.getQuestionFunction( questionLevelIndex );
+            var questionFunction = questionFunctionInfo.functionRef;
+            
+            if( undefined === askedForPerson[query.person.id] ) askedForPerson[query.person.id] = [];
+            if( $.inArray( questionFunctionInfo.functionName, askedForPerson[query.person.id] ) > -1 && 
+               askedForPerson[query.person.id].length < self.questionsForLevel[questionLevelIndex].length ) 
+            {
+                self.askForTarget( query ); // höfum spurt áður, finnum aðra
+            } else {
+                askedForPerson[query.person.id].push( questionFunctionInfo.functionName );
                 
                 $('#question').text(query.person.name);
                 levelResults[self.currentQuestion] = {};
@@ -270,7 +282,7 @@ $(function () {
                 query.canFailWithSelf = false;
                 query.callback = self.handleQuestionForTarget;
                 questionFunction( query );                
-//            }
+            }
         };
         
         //this.handleQuestionForDistraction = function( question, questionPosition) {
@@ -301,7 +313,7 @@ $(function () {
         this.startLevel = function( levelIndex ) {
             $.mobile.loading( 'show', { text: 'Sæki spurningu', textVisible:true});
             levelResults = {};
-//            askedForPerson = {};
+            askedForPerson = {};
             this.currentQuestion = 0;
             this.currentLevelIndex  = levelIndex;
             this.addInfoSteps();
@@ -323,7 +335,8 @@ $(function () {
                     do {
                         indexForPersonToPresent = randomFromInterval( oneLevel.startIndex, oneLevel.endIndex );
                         // TODO: completed questions
-                    } while( oneLevel.completedIndexes[indexForPersonToPresent] );  // ef höfum afgreitt einstakling, tökum næsta
+                    //} while( oneLevel.completedIndexes[indexForPersonToPresent] );  // ef höfum afgreitt einstakling, tökum næsta
+                    } while( missingAncestorId == this.ancestry[indexForPersonToPresent] );
                 }
                 
                 // sækjum ranga möguleika
@@ -337,7 +350,9 @@ $(function () {
                 for( var i=0; i < 2; i++ ) {
                     var oneWrongAncestryIndex = randomFromInterval(ancestryStartIndex, oneLevel.endIndex);
                     if( oneWrongAncestryIndex == indexForPersonToPresent || 
-                       $.inArray(oneWrongAncestryIndex, wrongAncestryIndexes) > -1 ) {
+                       $.inArray(oneWrongAncestryIndex, wrongAncestryIndexes) > -1 ||
+                        missingAncestorId == this.ancestry[oneWrongAncestryIndex] ) 
+                    {
                         i--;
                     } else {
                         wrongAncestryIndexes[i] = oneWrongAncestryIndex;
@@ -471,6 +486,7 @@ $(function () {
             var correctCount = 0;
             var totalAnswerTime = 0;
             var totalPoints = 0;
+            $('#s-skyldleikur-stada h1:first').text('Ættliður '+ self.currentLevelIndex + ' - úrslit');
             $.each(levelResults, function(questionNo, result){
                 var oneListItem = $('<li/>');
                 var splitLeft = $('<a/>', {'href':'#'} );
@@ -501,6 +517,9 @@ $(function () {
         
         function randomFromInterval(from,to) {
             return Math.floor(Math.random()*(to-from+1)+from);
+        }
+        function isEmpty(str) {
+            return (!str || 0 === str.length);
         }
         
         this.initialize = function() {
@@ -575,7 +594,7 @@ $(function () {
                     greeting = 'Velkomin/n, ';
                     break;
             }
-            $('#s-skyldleikur div[data-role="content"] h1').text(greeting + user.name + '!');
+            $('#s-skyldleikur div[data-role="content"] h2').text(greeting + user.name + '!');
             showLevels();
         })
         .fail(function( jqxhr, textStatus, error ) {
@@ -591,6 +610,14 @@ $(function () {
         var ul = $( '<ul/>', {'class':'levelentry', 'data-role': 'listview', 'data-inset':'true', html: '<li>Liður ' + levelIndex + '</li>' } );
         ul.append($('<li/>').append( $('<a/>', {'href':'#', 'data-transition':'slide','text':linkTitle, 'data-levelindex':levelIndex}) ) );
         return ul;
+    }
+    function levelHasAnyPerson( levelData ) {
+        var levelIds = einnSkyldleikur.ancestry.slice(levelData.startIndex, levelData.endIndex);
+        var hasAny = false;
+        $.each(levelIds, function( index, value ){
+            if( value != missingAncestorId ) hasAny = true;
+        });
+        return hasAny;
     }
     function showLevels() {
         var levelsContainer = $('#levels-container');
@@ -613,7 +640,7 @@ $(function () {
                 }
                 linkTitle += "langömmurnar og -afarnir";
             }
-            if( index > 0 ) {
+            if( index > 0 && levelHasAnyPerson(levelData) ) {
                 var oneList = getOneLevelListMarkup( index, linkTitle );
                 levelsContainer.append( oneList );
                 oneList.listview();                
