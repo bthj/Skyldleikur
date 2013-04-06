@@ -35,21 +35,72 @@ $(function () {
         this.levels = [];
 
         
-        //this.askPlaceAndYearOfBirth = function( personIndex, gender ) {
-        this.askPlaceAndYearOfBirth = function( person, canFailWithSelf ) {
+        this.getAllButLastName = function( name ) {
+            var nameParts = name.split(' ');
+            return nameParts.slice(0,nameParts.length-1).join(' ');
+        };
+        
+        this.askPlaceAndYearOfBirth = function( person, canFailWithSelf, questionPosition, callback, levelIndex, questionFunction ) {
             var question = {};
             question.title = 'fæddist';
             question.option = person.pob + ' ' + person.dob.substring(0,4);
-            return question;
+            callback( question, questionPosition, person, levelIndex, questionFunction );
         };
-        this.askSibling = function( person, canFailWithSelf ) {
-            return undefined;
+        this.askSibling = function( person, canFailWithSelf, questionPosition, callback, levelIndex, questionFunction ) {
+            var question = {};
+            question.title = 'á systkini sem heitir';
+            $.getJSON( '/ie/ib_app/siblings', { 'session': sessionId, 'id': person.id } )
+            .done( function( siblings ) {
+                if( siblings.length ) {
+                    var oneSibling = siblings[randomFromInterval(0, siblings.length-1)];
+                    question.option = self.getAllButLastName( oneSibling.name );
+                    callback( question, questionPosition, person, levelIndex, questionFunction );
+                } else {
+                    if( canFailWithSelf ) {
+                        question.option = self.getAllButLastName( person.name );
+                        callback( question, questionPosition, person, levelIndex, questionFunction );
+                    } else {
+                        callback( undefined, questionPosition, person, levelIndex, questionFunction );
+                    }
+                }
+            });
         };
-        this.askCountSiblings = function( person, canFailWithSelf ) {
-            return undefined;
+        this.askCountSiblings = function( person, canFailWithSelf, questionPosition, callback, levelIndex, questionFunction ) {
+            var question = {};
+            question.title = 'á';
+            if( canFailWithSelf ) {
+                question.option = randomFromInterval(1, 10) + ' systkini';
+                callback( question, questionPosition, person, levelIndex, questionFunction );
+            } else {
+                $.getJSON( '/ie/ib_app/siblings', { 'session': sessionId, 'id': person.id } )
+                .done( function( siblings ) {
+                    if( siblings.length ) {
+                        question.option = siblings.length + ' systkini';
+                        callback( question, questionPosition, person, levelIndex, questionFunction );
+                    } else {
+                        callback( undefined, questionPosition, person, levelIndex, questionFunction );
+                    }
+                });                
+            }
         };
-        this.askChild = function( person, canFailWithSelf ) {
-            return undefined;
+        this.askChild = function( person, canFailWithSelf, questionPosition, callback, levelIndex, questionFunction ) {
+            var question = {};
+            question.title = 'á barn sem heitir';
+            $.getJSON( '/ie/ib_app/children', { 'session': sessionId, 'id': person.id } )
+            .done( function( children ) {
+                if( children.length ) {
+                    var oneChild = children[randomFromInterval(0, children.length-1)];
+                    question.option = self.getAllButLastName( oneChild.name );
+                    callback( question, questionPosition, person, levelIndex, questionFunction );
+                } else {
+                    if( canFailWithSelf ) {
+                        question.option = self.getAllButLastName( person.name );
+                        callback( question, questionPosition, person, levelIndex, questionFunction );
+                    } else {
+                        callback( undefined, questionPosition, person, levelIndex, questionFunction );
+                    }
+                }
+            });
         };
         this.askGrandChild = function( person, canFailWithSelf ) {
             return undefined;
@@ -80,23 +131,23 @@ $(function () {
                 this.askPlaceAndYearOfBirth,
                 this.askSibling,
                 this.askCountSiblings,
-                this.askChild,
-                this.askGrandChild,
-                this.askCountChildren,
-                this.askCountGrandChildren,
-                this.askParent,
-                this.askAge
+                this.askChild
+//                this.askGrandChild,
+//                this.askCountChildren,
+//                this.askCountGrandChildren,
+//                this.askParent,
+//                this.askAge
                 ],
             2 : [
                 this.askPlaceAndYearOfBirth,
                 this.askSibling,
                 this.askCountSiblings,
-                this.askChild,
-                this.askGrandChild,
-                this.askCountChildren,
-                this.askCountGrandChildren,
-                this.askParent,
-                this.askAge
+                this.askChild
+//                this.askGrandChild,
+//                this.askCountChildren,
+//                this.askCountGrandChildren,
+//                this.askParent,
+//                this.askAge
                 ],
             3 : [
                 this.askPlaceAndYearOfBirth,
@@ -121,15 +172,7 @@ $(function () {
         };
         
         // fáum spurningu fyrir manneskjuna sem við höfum í huga
-        this.askForTarget = function( person, levelIndex, questionPosition ) {
-            $('#question').text(person.name);
-            levelResults[this.currentQuestion] = {};
-            levelResults[this.currentQuestion].person = person.name;
-            //levelResults[this.currentQuestion].question = question;
-            
-            var questionFunction = this.getQuestionFunction( levelIndex );
-            var question = questionFunction( person, false );
-
+        this.handleQuestionForTarget = function( question, questionPosition, person, levelIndex, questionFunction ) {
             if( question ) {
                 questionCandidates[questionPosition].questionTitle = question.title;
                 questionCandidates[questionPosition].questionOption = question.option;
@@ -138,20 +181,34 @@ $(function () {
                 }
             } else { // köllum í okkur sjálf þangað til við fáum spurningu
                 this.askForTarget(  person, levelIndex, questionPosition );
+            }            
+        };
+        this.askForTarget = function( person, levelIndex, questionPosition ) {
+            $('#question').text(person.name);
+            levelResults[this.currentQuestion] = {};
+            levelResults[this.currentQuestion].person = person.name;
+            //levelResults[this.currentQuestion].question = question;
+            
+            var questionFunction = this.getQuestionFunction( levelIndex );
+            //var question = 
+            questionFunction( person, false, questionPosition, this.handleQuestionForTarget, levelIndex, questionFunction );
+        };
+        
+        this.handleQuestionForDistraction = function( question, questionPosition) {
+            questionCandidates[questionPosition].questionTitle = question.title;
+            questionCandidates[questionPosition].questionOption = question.option;
+            if( self.allQuestionOptionsReady() ) {
+                self.addAnswerButtons();
+                $.mobile.loading( 'hide' );
+                levelResults[self.currentQuestion].startTime = new Date().getTime();
             }
         };
         this.askForDistraction = function( questionPosition, questionFunction ) {
             var personId = self.ancestry[questionCandidates[questionPosition].personIndex];
             $.getJSON( '/ie/ib_app/get', { 'session': sessionId, 'id': personId } )
             .done( function( person ) {
-                var question = questionFunction( person, true );
-                questionCandidates[questionPosition].questionTitle = question.title;
-                questionCandidates[questionPosition].questionOption = question.option;
-                if( self.allQuestionOptionsReady() ) {
-                    self.addAnswerButtons();
-                    $.mobile.loading( 'hide' );
-                    levelResults[self.currentQuestion].startTime = new Date().getTime();
-                }
+                //var question = 
+                questionFunction( person, true, questionPosition, self.handleQuestionForDistraction );
             });
         };
         
@@ -175,6 +232,8 @@ $(function () {
             $('#question, #answer-buttons').empty();
             
             if( this.currentQuestion <= this.questionsPerLevel ) {
+                $('#correctPopup').popup('close');
+                
                 var oneLevel = this.levels[levelIndex];
                 var indexForPersonToPresent;
                 var countCompletedPersons = oneLevel.endIndex - (oneLevel.startIndex-1);
@@ -310,11 +369,11 @@ $(function () {
                 levelResults[this.currentQuestion].answeredCorrectly = answeredCorrectly;
                 
                 setTimeout( function(){
-                    $('#correctPopup').popup('close');
                     $.mobile.loading( 'show', { text: 'Sæki...', textVisible:true});
-                    setTimeout( function(){
-                        self.presentQuestion(self.currentLevelIndex);
-                    }, 50);
+                    self.presentQuestion(self.currentLevelIndex);
+//                    setTimeout( function(){
+//                        self.presentQuestion(self.currentLevelIndex);
+//                    }, 50);
                 }, 950);
             }
         };
