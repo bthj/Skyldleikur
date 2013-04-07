@@ -16,5 +16,7 @@
     <author href="http://www.nemur.net" email="nemur@nemur.net">
         Björn Þór Jónsson
     </author>
+    
+    <feature name="http://api.phonegap.com/1.0/network"/>
 
 </widget>
