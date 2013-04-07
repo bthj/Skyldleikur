@@ -21,13 +21,6 @@ $(function () {
 
     var isApp;
     var IEAPIBaseUrl;
-//	if( typeof(PhoneGap) == 'undefined' ) {
-//        IEAPIBaseUrl = '/ie/ib_app';
-//        isApp = false;
-//	} else {
-//        IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
-//        isApp = true;
-//	}
 	if( navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/) ) {
         IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
         isApp = true;
@@ -771,7 +764,6 @@ $(function () {
     // events
     
     $('#login').submit(function () {
-        alert(IEAPIBaseUrl+'/login');
         $.mobile.loading( 'show', { text: 'Skrái inn', textVisible:true});
         $.ajax({
             type: 'GET',
