@@ -54,10 +54,13 @@ $(function () {
         */
         this.levels = [];
         
-        
+        var scoreStorageKey = 'skyldleikurScore';
+        this.getUserScoreStorageKey = function(){
+            return scoreStorageKey + user.name + user.dob;
+        };
         this.getScoreFromLocalStorage = function() {
             if( isLocalStorage ) {
-                var currentScore = localStorage[scoreStorageKey];
+                var currentScore = localStorage[this.getUserScoreStorageKey()];
                 if( ! currentScore ) currentScore = JSON.stringify({});
                 return JSON.parse( currentScore );
             } else {
@@ -66,7 +69,7 @@ $(function () {
         };
         this.saveScoreToLocalStorage = function( score ) {
             if( isLocalStorage ) {
-                localStorage[scoreStorageKey] = JSON.stringify( score );
+                localStorage[this.getUserScoreStorageKey()] = JSON.stringify( score );
             }
         };
 
@@ -822,11 +825,15 @@ $(function () {
             $.mobile.changePage('#s-login');
         }
     });
+    $( document ).delegate("#s-login", "pageinit", function(){
+        user = undefined;
+        sessionId = undefined;
+    });
     
     // falin síða til að hreinsa stig
     $( document ).delegate("#s-skyldleikur-reset", "pageinit", function() {
         if( isLocalStorage ) {
-            localStorage.removeItem(scoreStorageKey);
+            localStorage.removeItem(einnSkyldleikur.getUserScoreStorageKey());
         }
     });
     
