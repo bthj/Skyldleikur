@@ -2,7 +2,10 @@
 /*global $, jQuery, alert, console */
 /*jshint loopfunc: true */
 
-//var einnSkyldleikur;
+$(document).bind("mobileinit", function(){
+	$.mobile.allowCrossDomainPages = true;
+    $.support.cors = true;
+});
 
 $(function () {
 //(function() {
@@ -15,9 +18,17 @@ $(function () {
         isLocalStorage = false;
     }
     var scoreStorageKey = 'skyldleikurScore';
+
+    var isApp;
+    var IEAPIBaseUrl;
+	if( typeof(PhoneGap) == 'undefined' ) {
+        IEAPIBaseUrl = '/ie/ib_app';
+        isApp = false;
+	} else {
+        IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
+        isApp = true;
+	}
     
-    // var IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
-    var IEAPIBaseUrl = '/ie/ib_app';
     var missingAncestorId = 999999;
     
     var user;
@@ -113,14 +124,14 @@ $(function () {
             self.askRelation( 
                 query, 
                 (isEmpty(query.person.dod) ? 'á':'átti')+' systkini sem heitir', 
-                '/ie/ib_app/siblings' );
+                IEAPIBaseUrl+'/siblings' );
         };
         this.askChild = function( query ) {
             
             self.askRelation( 
                 query, 
                 (isEmpty(query.person.dod) ? 'á':'átti')+' barn sem heitir', 
-                '/ie/ib_app/children' );
+                IEAPIBaseUrl+'/children' );
         };
         
         this.askCountRelations = function( query, title, optionAppendix, restUrl ) {
@@ -150,12 +161,12 @@ $(function () {
         this.askCountSiblings = function( query ) {
             
             self.askCountRelations( 
-                query, (isEmpty(query.person.dod) ? 'á':'átti'), ' systkini', '/ie/ib_app/siblings' );
+                query, (isEmpty(query.person.dod) ? 'á':'átti'), ' systkini', IEAPIBaseUrl+'/siblings' );
         };
         this.askCountChildren = function( query ) {
             
             self.askCountRelations( 
-                query, (isEmpty(query.person.dod) ? 'á':'átti'), ' börn', '/ie/ib_app/children' );
+                query, (isEmpty(query.person.dod) ? 'á':'átti'), ' börn', IEAPIBaseUrl+'/children' );
         };
         
         this.askGrandChild = function( query ) {
@@ -321,7 +332,7 @@ $(function () {
         };
         this.askForDistraction = function( questionPosition, questionFunction, correctOptions, title ) {
             var personId = self.ancestry[questionCandidates[questionPosition].personIndex];
-            $.getJSON( '/ie/ib_app/get', { 'session': sessionId, 'id': personId } )
+            $.getJSON( IEAPIBaseUrl+'/get', { 'session': sessionId, 'id': personId } )
             .done( function( person ) {
                 var query = {'person':person, 'canFailWithSelf':true, 'correctOptions':correctOptions, 'title':title,
                              'questionPosition':questionPosition, 'callback':self.handleQuestionForDistraction};
@@ -402,7 +413,7 @@ $(function () {
                 questionCandidates[questionDisplayIndexes[2]].personIndex = indexForPersonToPresent;
                 questionCandidates[questionDisplayIndexes[2]].correct = true;
                 
-                $.getJSON( '/ie/ib_app/get', { 'session': sessionId, 'id': self.ancestry[indexForPersonToPresent] } )
+                $.getJSON( IEAPIBaseUrl+'/get', { 'session': sessionId, 'id': self.ancestry[indexForPersonToPresent] } )
                 .done( function( person ) {
                     var query = {'person':person, 'levelIndex':levelIndex, 'questionPosition':questionDisplayIndexes[2]};
                     self.askForTarget( query );
@@ -608,6 +619,13 @@ $(function () {
                 self.processAnswer( $(this) );
             });
             
+            $.each( this.correctSounds, function(index, sound){
+                sound.load();
+            });
+            $.each( this.incorrectSounds, function(index, sound){
+                sound.load();
+            });
+            
             // this.printAllLevelNames();
         };
         
@@ -621,7 +639,7 @@ $(function () {
                     $.ajax({
                         type: 'GET',
                         dataType: 'json',
-                        url: '/ie/ib_app/get',
+                        url: IEAPIBaseUrl+'/get',
                         data: { 'session': sessionId, 'id': self.ancestry[i] },
                         async: false,
                         success: function( person ) {
@@ -638,7 +656,7 @@ $(function () {
     function initializeSkyldleikurinn() {
         
         // sækjum framættartré og upphafsstillum hlut Skyldleikjar
-        $.getJSON( '/ie/ib_app/ancestors', { 'session': sessionId, 'id': user.id } )
+        $.getJSON( IEAPIBaseUrl+'/ancestors', { 'session': sessionId, 'id': user.id } )
         .done( function( ancestors ) {
             
             einnSkyldleikur = new Skyldleikurinn( ancestors );
@@ -729,7 +747,7 @@ $(function () {
     function setUserFromLogin( loginData ) {
         var sessionAndId = loginData.split(',');
         sessionId = sessionAndId[0];
-        $.getJSON( '/ie/ib_app/get', { 'session': sessionId, 'id': sessionAndId[1] } )
+        $.getJSON( IEAPIBaseUrl+'/get', { 'session': sessionId, 'id': sessionAndId[1] } )
         .done( function( person ) {
             
             user = person;
@@ -750,7 +768,7 @@ $(function () {
         $.ajax({
             type: 'GET',
             dataType: 'text',
-            url: '/ie/ib_app/login',
+            url: IEAPIBaseUrl+'/login',
             data: { 'user': $('#name').val(), 'pwd': $('#password').val() },
             success: function ( loginData ) {
                 if( loginData.indexOf("Invalid") >= 0 ) {
