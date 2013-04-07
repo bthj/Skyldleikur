@@ -764,6 +764,7 @@ $(function () {
     // events
     
     $('#login').submit(function () {
+        alert(IEAPIBaseUrl+'/login');
         $.mobile.loading( 'show', { text: 'Skrái inn', textVisible:true});
         $.ajax({
             type: 'GET',
