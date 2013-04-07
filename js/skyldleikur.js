@@ -21,12 +21,19 @@ $(function () {
 
     var isApp;
     var IEAPIBaseUrl;
-	if( typeof(PhoneGap) == 'undefined' ) {
-        IEAPIBaseUrl = '/ie/ib_app';
-        isApp = false;
-	} else {
+//	if( typeof(PhoneGap) == 'undefined' ) {
+//        IEAPIBaseUrl = '/ie/ib_app';
+//        isApp = false;
+//	} else {
+//        IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
+//        isApp = true;
+//	}
+	if( navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/) ) {
         IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
         isApp = true;
+	} else {
+        IEAPIBaseUrl = '/ie/ib_app';
+        isApp = false;
 	}
     
     var missingAncestorId = 999999;
