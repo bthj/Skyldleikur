@@ -19,15 +19,15 @@ $(function () {
     }
     var scoreStorageKey = 'skyldleikurScore';
 
-    var isApp;
     var IEAPIBaseUrl;
-	if( navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/) ) {
+    var isPhonegap = function() {
+        return (typeof(cordova) !== 'undefined' || typeof(phonegap) !== 'undefined');
+    };
+    if( isPhonegap() ) {
         IEAPIBaseUrl = 'http://www.islendingabok.is/ib_app';
-        isApp = true;
-	} else {
+    } else {
         IEAPIBaseUrl = '/ie/ib_app';
-        isApp = false;
-	}
+    }
     
     var missingAncestorId = 999999;
     
@@ -811,6 +811,7 @@ $(function () {
     // stillum af leikinn þegar forsíðan en endurhlaðin
     $( document ).delegate("#s-skyldleikur", "pagebeforeshow", function() {
         if( einnSkyldleikur ) {
+            $('#s-skyldleikur div[data-role="content"] h2').text( user.name );
             showLevels();
         } else {
             $.mobile.changePage('#s-login');
