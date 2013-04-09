@@ -11,6 +11,6 @@ httpProxy.createServer(
 ).listen(8000);
 
 connect.createServer(
-  connect.favicon(),
+  connect.favicon('assets/graphics/favicon.ico'),
   connect.static(__dirname+"/")
 ).listen(8081);

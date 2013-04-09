@@ -28,6 +28,12 @@ $(function () {
     } else {
         IEAPIBaseUrl = '/ie/ib_app';
     }
+    var isMobile;
+    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
+        isMobile = true;
+    } else {
+        isMobile = false;
+    }
     
     var missingAncestorId = 999999;
     
@@ -351,6 +357,8 @@ $(function () {
         this.startLevel = function( levelIndex ) {
             $.mobile.loading( 'show', { text: 'Sæki spurningu', textVisible:true});
             levelResults = {};
+console.log(levelResults);
+console.log(this.currentLevelIndex);
             askedForPerson = {};
             this.currentQuestion = 0;
             this.currentLevelIndex  = levelIndex;
@@ -494,10 +502,10 @@ $(function () {
             new Audio('assets/audio/right1.ogg'), new Audio('assets/audio/right2.ogg'), new Audio('assets/audio/right3.ogg')];
         this.incorrectSounds = [new Audio('assets/audio/wrong1.ogg'), new Audio('assets/audio/wrong2.ogg')];
         this.playCorrectSound = function() {
-            self.correctSounds[randomFromInterval(0,self.correctSounds.length-1)].play();
+            if( ! isMobile ) self.correctSounds[randomFromInterval(0,self.correctSounds.length-1)].play();
         };
         this.playIncorrectSound = function() {
-            self.incorrectSounds[randomFromInterval(0,self.incorrectSounds.length-1)].play();
+            if( ! isMobile ) self.incorrectSounds[randomFromInterval(0,self.incorrectSounds.length-1)].play();
         };
         this.processAnswer = function( button ) {
             // TODO: handle if multiple idendical choices
@@ -622,12 +630,14 @@ $(function () {
                 self.processAnswer( $(this) );
             });
             
-            $.each( this.correctSounds, function(index, sound){
-                sound.load();
-            });
-            $.each( this.incorrectSounds, function(index, sound){
-                sound.load();
-            });
+            if( !isMobile ) {
+                $.each( this.correctSounds, function(index, sound){
+                    sound.load();
+                });
+                $.each( this.incorrectSounds, function(index, sound){
+                    sound.load();
+                });
+            }
             
             // this.printAllLevelNames();
         };
@@ -841,6 +851,7 @@ $(function () {
     $( document ).delegate("#s-login", "pageinit", function(){
         user = undefined;
         sessionId = undefined;
+        einnSkyldleikur = undefined;
     });
     
     // falin síða til að hreinsa stig
