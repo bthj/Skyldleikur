@@ -669,16 +669,16 @@ $(function () {
             var greeting;
             switch( user.gender ) {
                 case 2:
-                    greeting = 'Velkomin, ';
+                    greeting = 'Velkomin, <br>';
                     break;
                 case 1:
-                    greeting = 'Velkominn, ';
+                    greeting = 'Velkominn, <br>';
                     break;
                 default:
-                    greeting = 'Velkomin/n, ';
+                    greeting = 'Velkomin/n, <br>';
                     break;
             }
-            $('#s-skyldleikur div[data-role="content"] h2').text(greeting + user.name + '!');
+            $('#s-skyldleikur div[data-role="content"] h2').html(greeting + user.name + '!');
             showLevels();
         })
         .fail(function( jqxhr, textStatus, error ) {
@@ -691,7 +691,20 @@ $(function () {
     
 
     function getOneLevelListMarkup( levelIndex, linkTitle, score ) {
-        var ul = $( '<ul/>', {'class':'levelentry', 'data-role': 'listview', 'data-inset':'true', html: '<li>Liður ' + levelIndex + '</li>' } );
+        var activeBird = '<img src="assets/graphics/fugl_blar.svg" width="24" height="24"/>';
+        var inactiveBird = '<img src="assets/graphics/fugl_grar.svg" width="24" height="24"/>';
+        var reward;
+        if( undefined === score || score <= 20 ) {
+            reward = inactiveBird+inactiveBird+inactiveBird;
+        } else if( score > 20 && score <= 250 ) {
+            reward = activeBird+inactiveBird+inactiveBird;
+        } else if( score > 250 && score <= 1000 ) {
+            reward = activeBird+activeBird+inactiveBird;
+        } else if( score > 1000 ) {
+            reward = activeBird+activeBird+activeBird;
+        }
+        var ul = $( '<ul/>', {'class':'levelentry', 'data-role': 'listview', 'data-inset':'true', 
+                              html: '<li>Liður ' + levelIndex + '<p class="activebird">'+reward+'</p></li>' } );
         ul.append($('<li/>').append( $('<a/>', {
             'href':'#', 'data-transition':'slide',
             'html':linkTitle + (score ? ' <span class="ui-li-count">'+score+' stig</span>' : ''), 
