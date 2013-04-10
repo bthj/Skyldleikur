@@ -1,5 +1,5 @@
 /*jslint browser: true*/
-/*global $, jQuery, alert, console, gaPlugin */
+/*global $, jQuery, alert, console */
 /*jshint loopfunc: true */
 
 $(document).bind("mobileinit", function(){
@@ -791,15 +791,31 @@ console.log(this.currentLevelIndex);
     }
     
     
-    // events
     
+    ///// events
+    
+    // analytics
     function nativePluginResultHandler( result ) { }
-    function nativePluginErrorHandler( error ) { }
+    function nativePluginErrorHandler( error ) { }   
+    var gaPlugin;
+    function onDeviceReady() {
+        gaPlugin = window.plugins.gaPlugin;
+        gaPlugin.init(nativePluginResultHandler, nativePluginErrorHandler, "UA-37626236-3", 10);
+        alert(gaPlugin);
+    }
+    function persistTasks() {
+        gaPlugin.exit(nativePluginResultHandler, nativePluginErrorHandler);
+    }
     function trackPage( url ) {
         if( isPhonegap() ) {
             gaPlugin.trackPage( nativePluginResultHandler, nativePluginErrorHandler, url );
         }
     }
+    document.addEventListener("deviceready", onDeviceReady, false);
+    document.addEventListener("unload", persistTasks, false);
+    
+    
+    // page events
     $('#login').submit(function () {
         $.mobile.loading( 'show', { text: 'Skrái inn', textVisible:true});
         $.ajax({
@@ -869,6 +885,7 @@ console.log(this.currentLevelIndex);
         sessionId = undefined;
         einnSkyldleikur = undefined;
     });
+    
     
     // falin síða til að hreinsa stig
     $( document ).delegate("#s-skyldleikur-reset", "pageinit", function() {
