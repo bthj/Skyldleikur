@@ -30,6 +30,9 @@
 }
 
 
+#s-login a {
+    color: #6b8581;
+}
 
 /* theme override - hakk til að slípa til, taka í gegnum Themeroller jafnvel, síðar... */
 h1 { font-weight:normal; }

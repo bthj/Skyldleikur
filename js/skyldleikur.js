@@ -1,5 +1,5 @@
 /*jslint browser: true*/
-/*global $, jQuery, alert, console */
+/*global $, jQuery, alert, console, gaPlugin */
 /*jshint loopfunc: true */
 
 $(document).bind("mobileinit", function(){
@@ -7,8 +7,8 @@ $(document).bind("mobileinit", function(){
     $.support.cors = true;
 });
 
-$(function () {
-//(function() {
+
+$(function () {  // document ready
     "use strict";
     
     var isLocalStorage;
@@ -178,7 +178,7 @@ $(function () {
                 query, (isEmpty(query.person.dod) ? 'á':'átti'), ' börn', IEAPIBaseUrl+'/children' );
         };
         
-        this.askGrandChild = function( query ) {
+        this.askGrandChild = function( query ) { // óútfært...
             query.question = undefined;
             query.callback( query );
         };
@@ -598,13 +598,6 @@ console.log(this.currentLevelIndex);
         
         
         
-        function randomFromInterval(from,to) {
-            return Math.floor(Math.random()*(to-from+1)+from);
-        }
-        function isEmpty(str) {
-            return (!str || 0 === str.length);
-        }
-        
         this.initialize = function() {
             this.levels = [];
             // setjum upphafs- og endavísa fyrir hvert borð / ættlegg / hæð í trénu
@@ -666,6 +659,17 @@ console.log(this.currentLevelIndex);
         this.initialize();
     };
     
+    
+    // utility 
+    
+    function randomFromInterval(from,to) {
+        return Math.floor(Math.random()*(to-from+1)+from);
+    }
+    function isEmpty(str) {
+        return (!str || 0 === str.length);
+    }
+    
+    
     function initializeSkyldleikurinn() {
         
         // sækjum framættartré og upphafsstillum hlut Skyldleikjar
@@ -696,7 +700,6 @@ console.log(this.currentLevelIndex);
             console.log( "Request Failed: " + err);
             // TODO: birta villuboð á forsíðu.
         });
-   
     }
     
 
@@ -811,6 +814,9 @@ console.log(this.currentLevelIndex);
                 // TODO: birta villuboð á forsíðu.
             }
         });
+        if( isPhonegap() ) {
+            gaPlugin.trackPage( null, null, "#login" );
+        }
         return false;
     });
 
@@ -844,11 +850,17 @@ console.log(this.currentLevelIndex);
         } else {
             $.mobile.changePage('#s-login');
         }
+        if( isPhonegap() ) {
+            gaPlugin.trackPage( null, null, "#s-skyldleikur" );
+        }
     });
     $( document ).delegate("#s-skyldleikur-spurn, #s-skyldleikur-stada", "pageinit", function() {
         $('.ui-page').css('background-image', 'url(assets/graphics/bakgrunnur.svg)');
         if( ! einnSkyldleikur ) {
             $.mobile.changePage('#s-login');
+        }
+        if( isPhonegap() ) {
+            gaPlugin.trackPage( null, null, location.hash );
         }
     });
     $( document ).delegate("#s-login", "pageinit", function(){
@@ -865,4 +877,3 @@ console.log(this.currentLevelIndex);
     });
     
 });
-//})();
