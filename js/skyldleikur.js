@@ -793,6 +793,13 @@ console.log(this.currentLevelIndex);
     
     // events
     
+    function nativePluginResultHandler( result ) { }
+    function nativePluginErrorHandler( error ) { }
+    function trackPage( url ) {
+        if( isPhonegap() ) {
+            gaPlugin.trackPage( nativePluginResultHandler, nativePluginErrorHandler, url );
+        }
+    }
     $('#login').submit(function () {
         $.mobile.loading( 'show', { text: 'Skrái inn', textVisible:true});
         $.ajax({
@@ -814,9 +821,7 @@ console.log(this.currentLevelIndex);
                 // TODO: birta villuboð á forsíðu.
             }
         });
-        if( isPhonegap() ) {
-            gaPlugin.trackPage( null, null, "#login" );
-        }
+        trackPage( "#login" );
         return false;
     });
 
@@ -850,18 +855,14 @@ console.log(this.currentLevelIndex);
         } else {
             $.mobile.changePage('#s-login');
         }
-        if( isPhonegap() ) {
-            gaPlugin.trackPage( null, null, "#s-skyldleikur" );
-        }
+        trackPage( "#s-skyldleikur" );
     });
     $( document ).delegate("#s-skyldleikur-spurn, #s-skyldleikur-stada", "pageinit", function() {
         $('.ui-page').css('background-image', 'url(assets/graphics/bakgrunnur.svg)');
         if( ! einnSkyldleikur ) {
             $.mobile.changePage('#s-login');
         }
-        if( isPhonegap() ) {
-            gaPlugin.trackPage( null, null, location.hash );
-        }
+        trackPage( location.hash );
     });
     $( document ).delegate("#s-login", "pageinit", function(){
         user = undefined;
