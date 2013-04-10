@@ -21,5 +21,29 @@
     
     <gap:plugin name="GAPlugin" />
     
+    
+    
+    <icon src="assets/icons/ios/icon.png" gap:platform="ios" width="57" height="57" />
+    <icon src="assets/icons/ios/icon-72.png" gap:platform="ios" width="72" height="72" />
+    <icon src="assets/icons/ios/icon_at_2x.png" gap:platform="ios" width="114" height="114" />
+    
+    <icon src="assets/icons/android/ldpi.png" gap:platform="android" gap:density="ldpi" />
+    <icon src="assets/icons/android/mdpi.png" gap:platform="android" gap:density="mdpi" />
+    <icon src="assets/icons/android/hdpi.png" gap:platform="android" gap:density="hdpi" />
+    <icon src="assets/icons/android/xhdpi.png" gap:platform="android" gap:density="xhdpi" />
+    
+    <gap:splash src="assets/splash/ios/Default.png" width="320" height="480" />
+    <gap:splash src="assets/splash/ios/Default_at_2x.png" width="640" height="960" />
+    <gap:splash src="assets/splash/ios/Default_iphone5.png" width="640" height="1136" />
+<!--    <gap:splash src="assets/splash/ios/Default-Landscape.png" width="1024" height="768" />-->
+<!--    <gap:splash src="assets/splash/ios/Default-Portrait.png" width="768" height="1024" />-->
+    
+    <gap:splash src="assets/splash/android/ldpi.png" gap:platform="android" gap:density="ldpi" />
+    <gap:splash src="assets/splash/android/mdpi.png" gap:platform="android" gap:density="mdpi" />
+    <gap:splash src="assets/splash/android/hdpi.png" gap:platform="android" gap:density="hdpi" />
+    <gap:splash src="assets/splash/android/xhdpi.png" gap:platform="android" gap:density="xhdpi" />
+    
+    <preference name="prerendered-icon" value="true" />
+    <preference name="splash-screen-duration" value="3000" />
 
 </widget>
