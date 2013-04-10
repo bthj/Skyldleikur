@@ -99,6 +99,13 @@ $(function () {  // document ready
             question.title = 'fæddist';
             question.option = query.person.pob + ' ' + query.person.dob.substring(0,4);
             query.question = question;
+            if( query.canFailWithSelf ) {
+                if( $.inArray(question.option, query.correctOptions) > -1 ) {
+                    questionCandidates[query.questionPosition].correct = true;
+                }
+            } else {
+                query.correctOptions = [question.option];
+            }
             query.callback( query );
         };
         
