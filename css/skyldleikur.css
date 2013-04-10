@@ -1,0 +1,269 @@
+#s-skyldleikur-spurn ui-controlgroup-horizontal {
+    text-align:center !important;
+}
+#s-skyldleikur-spurn .ui-controlgroup-controls {
+    width:100%;
+}
+#s-skyldleikur-spurn .ui-controlgroup-controls a {
+    width:19.6%;
+}
+#step-buttons .ui-btn-inner {
+    padding-left: 25px;
+}
+#s-skyldleikur-stada a, #step-buttons a {
+    cursor:default;
+}
+
+
+@media screen and (min-width: 700px) {
+    .ui-page {
+        background-image: url(../assets/graphics/bakgrunnur_sky_litil_grein.svg);
+        background-size: cover;
+    }
+}
+@media screen and (max-width: 700px) {
+    .ui-page {
+        background-image: url(../assets/graphics/bakgrunnur_stor_grein.svg);
+        background-size: cover;
+        background-repeat:no-repeat;
+    }
+}
+
+
+
+/* theme override - hakk til að slípa til, taka í gegnum Themeroller jafnvel, síðar... */
+h1 { font-weight:normal; }
+h2, h3, .ui-content h1 {
+    color: #6b8581;
+    font-weight: normal;
+    letter-spacing: 1.8px;
+}
+p, label {
+    color: #8b5e3c;
+    letter-spacing: 1.8px;
+}
+
+
+.ui-header {
+    opacity: 0.95;
+}
+.ui-bar-a {
+    background: #c7e7dd;
+    border-color: #c7e7dd;
+    text-shadow: none;
+    font-weight: normal!important;
+    letter-spacing: 1.8px;
+}
+
+#levels-container .ui-listview-inset {
+    margin: 2em 0;
+}
+
+/* borð */
+
+.ui-btn-up-e {
+    background: #f7941e;
+    border: none;
+    font-weight: normal;
+    color: #fff;
+    text-shadow: none;
+    letter-spacing: 1.5px;
+    border-radius: 0.8em;
+}
+.ui-btn-down-e, .ui-btn-hover-e {
+    background: #bfd74f;
+    border: none;
+    font-weight: normal;
+    color: #fff;
+    text-shadow: none;
+    letter-spacing: 1.5px;
+    border-radius: 0.8em;
+}
+.ui-btn-hover-e:hover {
+    color: #fff;
+}
+
+
+/* borð */ 
+
+#s-skyldleikur .ui-li-static, #s-skyldleikur ui-first-child {
+    background: #f7f8ef!important;
+    border: none!important;;
+    color: #6b8581!important;;
+    font-weight: normal!important;;
+}
+#s-skyldleikur .ui-btn-up-c {
+    background:#90785a;
+    border: none;
+    text-shadow: none;
+    font-weight: normal;
+    color: #f7f8ef;
+    letter-spacing: 1.5px;
+}
+#s-skyldleikur .ui-btn-hover-c {
+    background:#bfd74f;
+    border: none;
+    text-shadow: none;
+    font-weight: normal;
+    color: #f7f8ef;
+    letter-spacing: 1.5px;
+}
+#s-skyldleikur .ui-link-inherit {
+    color: #f7f8ef!important;
+}
+
+
+/* spurningar */
+
+#s-skyldleikur-spurn #answer-buttons .ui-btn-up-c,
+{
+    border:none;
+}
+#s-skyldleikur-spurn .ui-btn-up-c .ui-btn-inner {
+    background-color:#fff;
+    border: none;
+    color: #90785a;
+    font-weight:normal;
+    text-shadow: none;
+    letter-spacing: 1.5px;
+}
+#s-skyldleikur-spurn #step-buttons .ui-btn-inner {
+    background-color:#fff;
+    background-size:auto 80%;
+    background-repeat:no-repeat;
+    background-position:center;
+    text-shadow: none;
+}
+#s-skyldleikur-spurn #step-buttons .ui-btn-up-b, #s-skyldleikur-spurn #step-buttons .ui-btn-hover-b,
+#s-skyldleikur-spurn #step-buttons .ui-btn-up-a, #s-skyldleikur-spurn #step-buttons .ui-btn-hover-a,
+#s-skyldleikur-spurn #step-buttons .ui-btn-hover-c {
+    border: 1px solid #ccc;
+}
+#s-skyldleikur-spurn #step-buttons .ui-btn-up-c .ui-btn-inner, 
+#s-skyldleikur-spurn #step-buttons .ui-btn-hover-c .ui-btn-inner {
+    background-image:url(../assets/graphics/fugl_grar_profil.svg);
+}
+#s-skyldleikur-spurn #step-buttons .ui-btn-up-b .ui-btn-inner, 
+#s-skyldleikur-spurn #step-buttons .ui-btn-hover-b .ui-btn-inner {
+    background-image:url(../assets/graphics/fugl_bleikur_profil.svg);
+}
+#s-skyldleikur-spurn #step-buttons .ui-btn-up-a .ui-btn-inner, 
+#s-skyldleikur-spurn #step-buttons .ui-btn-hover-a .ui-btn-inner {
+    background-image:url(../assets/graphics/fugl_svartur_profil.svg);
+}
+#s-skyldleikur-spurn .ui-btn-hover-c {
+    background:#bfd74f;
+    border: none;
+    color: #f7f8ef;
+    letter-spacing: 1.5px;
+    font-weight:normal;
+    text-shadow: none;
+}
+/* rétt svar */
+#s-skyldleikur-spurn #answer-buttons .ui-btn-up-b {
+    border:none;
+}
+#s-skyldleikur-spurn #answer-buttons .ui-btn-up-b .ui-btn-inner {
+    background-color:#bfd74f;
+    border: none;
+    color: #fff;
+    font-weight:normal;
+    text-shadow: none;
+    letter-spacing: 1.5px;
+}
+/* rangt svar */
+#s-skyldleikur-spurn #answer-buttons .ui-btn-up-a {
+    border:none;
+}
+#s-skyldleikur-spurn #answer-buttons .ui-btn-up-a .ui-btn-inner {
+    background-color:#555;
+    border: none;
+    color: #fff;
+    font-weight:normal;
+    text-shadow: none;
+    letter-spacing: 1.5px;
+}
+
+
+/* úrslit */
+/*
+#s-skyldleikur-stada .ui-li-link-alt {
+    background-repeat:no-repeat;
+    background-position:center;
+    background-image:url(../assets/graphics/fugl_svartur_profil.svg);
+}
+*/
+/* aðra umferð */
+#s-skyldleikur-stada .ui-btn-up-e{
+    color:#fff;
+}
+/* tafla */
+#s-skyldleikur-stada .ui-btn-up-c {
+    background:#f7f8ef;
+    text-shadow: none;
+    font-weight: normal;
+    color: #f7f8ef;
+    letter-spacing: 1.5px;
+}
+#s-skyldleikur-stada .ui-btn-hover-c {
+    background:#f7f8ef;
+    text-shadow: none;
+    font-weight: normal;
+    color: #f7f8ef;
+    letter-spacing: 1.5px;
+}
+#s-skyldleikur-stada .ui-link-inherit {
+    color: #f7f8ef!important;
+}
+/* rétt og rangt icon */
+#s-skyldleikur-stada #results-container .ui-btn-up-b {
+    background:#bfd74f;
+    border: none;
+    text-shadow: none;
+    font-weight: normal;
+    color: #f7f8ef;
+    letter-spacing: 1.5px;
+}
+#s-skyldleikur-stada #results-container .ui-btn-up-a {
+    background:#555;
+    border: none;
+    text-shadow: none;
+    font-weight: normal;
+    color: #f7f8ef;
+    letter-spacing: 1.5px;
+}
+/* hnappur: liðirnir */        
+#s-skyldleikur-stada a.ui-btn-up-b {
+    background:#90785a;
+    border: none;
+    text-shadow: none;
+    font-weight: normal;
+    color: #f7f8ef;
+    letter-spacing: 1.5px;
+}
+#s-skyldleikur-stada a.ui-btn-hover-b {
+    background:#bfd74f;
+    border: none;
+    text-shadow: none;
+    font-weight: normal;
+    color: #f7f8ef;
+    letter-spacing: 1.5px;
+}
+
+
+
+.activebird {
+    float: right; 
+    width: 72px; height: 24px;
+    text-align: center; 
+    vertical-align: middle; 
+    right:50;
+    margin-top:0px;
+}
+.inactivebird {
+    float: right; 
+    width: 24px; height: 24px;
+    text-align: center; 
+    vertical-align: middle; 
+    margin-top:0px;
+}

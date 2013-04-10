@@ -480,18 +480,16 @@ console.log(this.currentLevelIndex);
         this.highlightCorrectAnswer = function( index ) {
             if( undefined === index ) index = self.getCorrectAnswerIndex();
             //$('#answer'+(index+1)).buttonMarkup({theme: 'b', icon:'check'}).trigger("create");
-            $('#answer'+index).buttonMarkup({theme: 'b', icon:'check'});
+            $('#answer'+index).buttonMarkup({theme: 'b'});
         };
         this.highlightWrongAnswer = function( index ) {
-            $('#answer'+index).buttonMarkup({theme: 'a', icon:'delete'});
+            $('#answer'+index).buttonMarkup({theme: 'a'});
         };
         this.setProgressStatus = function( answeredCorrectly ) {
             if( answeredCorrectly ) {
-                $('#stepinfo'+this.currentQuestion).buttonMarkup({theme:'b', icon:'check'});
-                $('#stepinfo'+this.currentQuestion+' .ui-btn-text').text(':-)');
+                $('#stepinfo'+this.currentQuestion).buttonMarkup({theme:'b'});
             } else {
-                $('#stepinfo'+this.currentQuestion).buttonMarkup({theme:'a', icon:'delete'});
-                $('#stepinfo'+this.currentQuestion+' .ui-btn-text').text(':-(');
+                $('#stepinfo'+this.currentQuestion).buttonMarkup({theme:'a'});
             }
         };
         this.correctMessages = ['laukrétt!', 'frábært!', 'nákvæmlega!', 'vel gert!', 'snilld!'];
@@ -633,9 +631,11 @@ console.log(this.currentLevelIndex);
             if( !isMobile ) {
                 $.each( this.correctSounds, function(index, sound){
                     sound.load();
+                    sound.volume = 0.2;
                 });
                 $.each( this.incorrectSounds, function(index, sound){
                     sound.load();
+                    sound.volume = 0.2;
                 });
             }
             
@@ -702,6 +702,7 @@ console.log(this.currentLevelIndex);
 
     function getOneLevelListMarkup( levelIndex, linkTitle, score ) {
         var activeBird = '<img src="assets/graphics/fugl_blar.svg" width="24" height="24"/>';
+        var mostActiveBird = '<img src="assets/graphics/fugl_bleikur.svg" width="24" height="24"/>';
         var inactiveBird = '<img src="assets/graphics/fugl_grar.svg" width="24" height="24"/>';
         var reward;
         if( undefined === score || score <= 20 ) {
@@ -711,7 +712,7 @@ console.log(this.currentLevelIndex);
         } else if( score > 250 && score <= 1000 ) {
             reward = activeBird+activeBird+inactiveBird;
         } else if( score > 1000 ) {
-            reward = activeBird+activeBird+activeBird;
+            reward = activeBird+activeBird+mostActiveBird;
         }
         var ul = $( '<ul/>', {'class':'levelentry', 'data-role': 'listview', 'data-inset':'true', 
                               html: '<li>Liður ' + levelIndex + '<p class="activebird">'+reward+'</p></li>' } );
@@ -836,6 +837,7 @@ console.log(this.currentLevelIndex);
 
     // stillum af leikinn þegar forsíðan en endurhlaðin
     $( document ).delegate("#s-skyldleikur", "pagebeforeshow", function() {
+        $('.ui-page').css('background-image', 'url(assets/graphics/bakgrunnur.svg)');
         if( einnSkyldleikur ) {
             $('#s-skyldleikur div[data-role="content"] h2').text( user.name );
             showLevels();
@@ -844,6 +846,7 @@ console.log(this.currentLevelIndex);
         }
     });
     $( document ).delegate("#s-skyldleikur-spurn, #s-skyldleikur-stada", "pageinit", function() {
+        $('.ui-page').css('background-image', 'url(assets/graphics/bakgrunnur.svg)');
         if( ! einnSkyldleikur ) {
             $.mobile.changePage('#s-login');
         }
