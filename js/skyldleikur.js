@@ -8,6 +8,15 @@ $(document).bind("mobileinit", function(){
 });
 
 
+var _gaq = _gaq || [];
+
+(function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+
+
 $(function () {  // document ready
     "use strict";
     
@@ -441,7 +450,6 @@ console.log(this.currentLevelIndex);
             answerButtonsContainer.empty();
             answerButtonsContainer.append( $('<p/>', {
                 'html':'<strong>'+questionCandidates[1].questionTitle+'</strong>', 'style':'text-align:center;'}) );
-            //$.each( questionCandidates, function( key, oneCandidate ){
             for( var k=1; k <= 3; k++ ) {
                 var oneAnswer = $( '<a/>', {
                     'href':'#','data-role':'button','data-iconpos':'right',
@@ -450,7 +458,6 @@ console.log(this.currentLevelIndex);
                 });
                 answerButtonsContainer.append( oneAnswer ).append('<br/>');
             }
-            //});
             answerButtonsContainer.trigger('create');
         };
         
@@ -519,11 +526,13 @@ console.log(this.currentLevelIndex);
                     $('#correctPopup p').text( this.getCorrectMessage() );
                     $('#correctPopup').popup('open', {theme: "b", overlayTheme: "b", positionTo: button, transition: "pop", x: "10" });
                     correctCandidate = questionCandidates[selectedCandicateIndex];
+                    trackButtonEvent( "correct" );
                 } else {
                     self.playIncorrectSound();
                     self.highlightWrongAnswer( selectedCandicateIndex );
                     self.highlightCorrectAnswer();
                     correctCandidate = questionCandidates[self.getCorrectAnswerIndex()];
+                    trackButtonEvent( "correct" );
                 }
                 self.setProgressStatus( answeredCorrectly );
                 
@@ -792,28 +801,7 @@ console.log(this.currentLevelIndex);
     
     
     
-    ///// events
-    
-    // analytics
-    function nativePluginResultHandler( result ) { }
-    function nativePluginErrorHandler( error ) { }   
-    var gaPlugin;
-    function onDeviceReady() {
-        gaPlugin = window.plugins.gaPlugin;
-        gaPlugin.init(nativePluginResultHandler, nativePluginErrorHandler, "UA-37626236-3", 10);
-        alert(gaPlugin);
-    }
-    function persistTasks() {
-        gaPlugin.exit(nativePluginResultHandler, nativePluginErrorHandler);
-    }
-    function trackPage( url ) {
-        if( isPhonegap() ) {
-            gaPlugin.trackPage( nativePluginResultHandler, nativePluginErrorHandler, url );
-        }
-    }
-    document.addEventListener("deviceready", onDeviceReady, false);
-    document.addEventListener("unload", persistTasks, false);
-    
+    ///// events    
     
     // page events
     $('#login').submit(function () {
@@ -837,7 +825,7 @@ console.log(this.currentLevelIndex);
                 // TODO: birta villuboð á forsíðu.
             }
         });
-        trackPage( "#login" );
+        trackPage( "login" );
         return false;
     });
 
@@ -871,14 +859,14 @@ console.log(this.currentLevelIndex);
         } else {
             $.mobile.changePage('#s-login');
         }
-        trackPage( "#s-skyldleikur" );
+        trackPage( "s-skyldleikur" );
     });
     $( document ).delegate("#s-skyldleikur-spurn, #s-skyldleikur-stada", "pageinit", function() {
         $('.ui-page').css('background-image', 'url(assets/graphics/bakgrunnur.svg)');
         if( ! einnSkyldleikur ) {
             $.mobile.changePage('#s-login');
         }
-        trackPage( location.hash );
+        trackPage( location.hash.substr(1) );
     });
     $( document ).delegate("#s-login", "pageinit", function(){
         user = undefined;
@@ -893,5 +881,50 @@ console.log(this.currentLevelIndex);
             localStorage.removeItem(einnSkyldleikur.getUserScoreStorageKey());
         }
     });
+    
+    
+    // analytics
+    var GA_ID = "UA-37626236-3";
+    function nativePluginResultHandler( result ) { }
+    function nativePluginErrorHandler( error ) { }   
+    var gaPlugin;
+    function onDeviceReady() {
+        gaPlugin = window.plugins.gaPlugin;
+        gaPlugin.init(nativePluginResultHandler, nativePluginErrorHandler, GA_ID, 10);
+    }
+    function persistTasks() {
+        gaPlugin.exit(nativePluginResultHandler, nativePluginErrorHandler);
+    }
+    function trackPage( url ) {
+        if( isPhonegap() ) {
+            gaPlugin.trackPage( nativePluginResultHandler, nativePluginErrorHandler, url );
+        }
+    }
+    function trackButtonEvent( eventDescription ) {
+        if( isPhonegap() ) {
+            gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Button", "Click", eventDescription, 1);
+        }
+    }
+    document.addEventListener("deviceready", onDeviceReady, false);
+    document.addEventListener("unload", persistTasks, false);
+    
+    $('[data-role=page]').live('pageshow', function (event, ui) {
+        if( ! isPhonegap() ) {
+            try {
+                _gaq.push(['_setAccount', GA_ID]);
+        
+                var hash = location.hash;
+        
+                if (hash) {
+                    _gaq.push(['_trackPageview', hash.substr(1)]);
+                } else {
+                    _gaq.push(['_trackPageview']);
+                }
+            } catch(err) {
+        
+            }            
+        }
+    });
+    
     
 });
