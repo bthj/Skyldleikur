@@ -881,6 +881,13 @@ console.log(this.currentLevelIndex);
         einnSkyldleikur = undefined;
     });
     
+    $('#ib-external-link').click(function(){
+        if( isPhonegap() ) {
+            navigator.app.loadUrl("http://islendingabok.is", {openExternal: true});
+            return false;
+        }
+    });
+    
     
     // falin síða til að hreinsa stig
     $( document ).delegate("#s-skyldleikur-reset", "pageinit", function() {
