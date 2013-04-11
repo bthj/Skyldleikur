@@ -48,5 +48,6 @@
     
     
     <access origin="http://islendingabok.is" />
+    <access origin="http://nemur.net" subdomains="true" />
 
 </widget>
