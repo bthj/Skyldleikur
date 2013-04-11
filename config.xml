@@ -45,5 +45,8 @@
     
     <preference name="prerendered-icon" value="true" />
     <preference name="splash-screen-duration" value="4000" />
+    
+    
+    <access origin="http://islendingabok.is" />
 
 </widget>
