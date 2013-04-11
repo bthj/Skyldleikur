@@ -454,7 +454,7 @@ console.log(this.currentLevelIndex);
         
         this.addAnswerButtons = function() {
             var answerButtonsContainer = $('#answer-buttons');
-            answerButtonsContainer.empty();
+            //answerButtonsContainer.empty();
             answerButtonsContainer.append( $('<p/>', {
                 'html':'<strong>'+questionCandidates[1].questionTitle+'</strong>', 'style':'text-align:center;'}) );
             for( var k=1; k <= 3; k++ ) {
