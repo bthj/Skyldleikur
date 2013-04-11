@@ -47,10 +47,8 @@
     <preference name="splash-screen-duration" value="4000" />
     
     
-<!--
     <access origin="http://islendingabok.is" />
     <access origin="http://nemur.net" subdomains="true" />
     <access origin="http://jquery.com" subdomains="true" />
--->
 
 </widget>
