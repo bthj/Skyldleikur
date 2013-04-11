@@ -890,6 +890,12 @@ console.log(this.currentLevelIndex);
     });
     
     
+    // markaðsefni
+    if( ! isPhonegap() ) {
+        $('#login-external-content').show();
+    }
+    
+    
     // analytics
     var GA_ID = "UA-37626236-3";
     function nativePluginResultHandler( result ) { }
