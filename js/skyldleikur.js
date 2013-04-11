@@ -814,14 +814,14 @@ console.log(this.currentLevelIndex);
     $('#login').submit(function () {
         $.mobile.loading( 'show', { text: 'Skrái inn', textVisible:true});
         
-        var passwordParts = $('#password').val().split(' ');
-        var password = passwordParts.join('');
+//        var passwordParts = $('#password').val().split(' ');
+//        var password = passwordParts.join('');
 
         $.ajax({
             type: 'GET',
             dataType: 'text',
             url: IEAPIBaseUrl+'/login',
-            data: { 'user': $('#name').val(), 'pwd': password },
+            data: { 'user': $('#name').val(), 'pwd': $('#password').val() },
             success: function ( loginData ) {
                 if( loginData.indexOf("Invalid") >= 0 ) {
                     alert('Innskráning tókst ekki');
