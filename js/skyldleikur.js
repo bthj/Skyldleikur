@@ -116,9 +116,9 @@ $(function () {  // document ready
             .done( function( relations ) {
                 if( relations.length ) {
                     var oneRelation = relations[randomFromInterval(0, relations.length-1)];
-//                    if( ! isEmpty(oneRelation.dod) ) {
-//                        question.title = question.title.replace('á ', 'átti ');
-//                    }
+                    if( ! isEmpty(oneRelation.dod) ) {
+                        question.title = question.title.replace('á ', 'átti ');
+                    }
                     question.option = self.getAllButLastName( oneRelation.name );
                     if( query.canFailWithSelf ) {
                         if( $.inArray(question.option, query.correctOptions) > -1 ) {
