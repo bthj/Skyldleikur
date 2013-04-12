@@ -387,8 +387,8 @@ console.log(this.currentLevelIndex);
             this.currentQuestion++;
 
             if( this.currentQuestion <= this.questionsPerLevel ) {
-                $.mobile.loading( 'show', { text: 'Sæki spurningu', textVisible:true});
                 $('#correctPopup').popup('close');
+                $.mobile.loading( 'show', { text: 'Sæki spurningu', textVisible:true});
                 $('#question, #answer-buttons').empty();
                 
                 var oneLevel = this.levels[levelIndex];
