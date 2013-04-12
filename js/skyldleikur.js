@@ -385,11 +385,11 @@ console.log(this.currentLevelIndex);
     
         this.presentQuestion = function( levelIndex ) {
             this.currentQuestion++;
-            $('#question, #answer-buttons').empty();
-            
+
             if( this.currentQuestion <= this.questionsPerLevel ) {
                 $('#correctPopup').popup('close');
                 $.mobile.loading( 'show', { text: 'Sæki spurningu', textVisible:true});
+                $('#question, #answer-buttons').empty();
                 
                 var oneLevel = this.levels[levelIndex];
                 var indexForPersonToPresent;
