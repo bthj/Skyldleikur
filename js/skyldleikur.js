@@ -302,7 +302,7 @@ $(function () {  // document ready
         this.allQuestionOptionsReady = function() {
             var allReady = true;
             $.each( questionCandidates, function( key, oneCandidate ){
-                if( undefined === oneCandidate ) allReady = false;
+                if( undefined === oneCandidate.questionOption ) allReady = false;
             });
             return allReady;
         };
@@ -454,7 +454,6 @@ console.log(this.currentLevelIndex);
         
         this.addAnswerButtons = function() {
             var answerButtonsContainer = $('#answer-buttons');
-            //answerButtonsContainer.empty();
             answerButtonsContainer.append( $('<p/>', {
                 'html':'<strong>'+questionCandidates[1].questionTitle+'</strong>', 'style':'text-align:center;'}) );
             for( var k=1; k <= 3; k++ ) {
@@ -719,7 +718,7 @@ console.log(this.currentLevelIndex);
     }
     
 
-    function getOneLevelListMarkup( levelIndex, linkTitle, score ) {
+    function getRewardMarkup( score ) {
         var activeBird = '<img src="assets/graphics/fugl_blar.svg" width="24" height="24"/>';
         var mostActiveBird = '<img src="assets/graphics/fugl_bleikur.svg" width="24" height="24"/>';
         var inactiveBird = '<img src="assets/graphics/fugl_grar.svg" width="24" height="24"/>';
@@ -733,8 +732,11 @@ console.log(this.currentLevelIndex);
         } else if( score > 1000 ) {
             reward = activeBird+activeBird+mostActiveBird;
         }
+        return reward;
+    }
+    function getOneLevelListMarkup( levelIndex, linkTitle, score ) {
         var ul = $( '<ul/>', {'class':'levelentry', 'data-role': 'listview', 'data-inset':'true', 
-                              html: '<li>Liður ' + levelIndex + '<p class="activebird">'+reward+'</p></li>' } );
+                              html: '<li>Liður ' + levelIndex + '<p class="activebird">'+getRewardMarkup(score)+'</p></li>' } );
         ul.append($('<li/>').append( $('<a/>', {
             'href':'#', 'data-transition':'slide',
             'html':linkTitle + (score ? ' <span class="ui-li-count">'+score+' stig</span>' : ''), 
@@ -756,11 +758,11 @@ console.log(this.currentLevelIndex);
         var sumScore = 0;
         $.each( einnSkyldleikur.levels, function(index, levelData){
             var linkTitle = '';
-            if( index == 1 ) { // mamma og pabbi
+            if( index == 1 ) {
                 linkTitle = "Foreldrar";
             } else if( index == 2 ) { // ömmur og afar
                 linkTitle = "Ömmurnar og afarnir";
-            } else if( index == 3 ) { // langömmur og -afar
+            } else if( index == 3 ) {
                 linkTitle = "Langömmurnar og -afarnir";
             } else if( index > 3 ) {
                 for( var i=index; i > 3; i-- ) {
